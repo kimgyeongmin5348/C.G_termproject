@@ -40,14 +40,14 @@ float bottom[] =
 };
 
 typedef struct object {
-    float trans_x{}, trans_y{}, trans_z{};               // 기본 좌표값
-    float trans_x_aoc{}, trans_y_aoc{}, trans_z_aoc{};      // 좌표 변화량 aoc - amount of change
+    float x_trans{}, y_trans{}, z_trans{};               // 기본 좌표값
+    float x_trans_aoc{}, y_trans_aoc{}, z_trans_aoc{};      // 좌표 변화량 aoc - amount of change
 
-    float rotate_x{}, rotate_y{}, rotate_z{};            // trans(x_trans + x_trans_aoc, 0.0f, 0.0f)
-    float rotate_x_aoc{}, rotate_y_aoc{}, rotate_z_aoc{};   // You know what im say??
+    float x_rotate{}, y_rotate{}, z_rotate{};            // trans(x_trans + x_trans_aoc, 0.0f, 0.0f)
+    float x_rotate_aoc{}, y_rotate_aoc{}, z_rotate_aoc{};   // You know what im say??
 
-    float scale_x{ }, scale_y{}, scale_z{};
-    float scale_x_aoc{}, scale_y_aoc{}, scale_z_aoc{};
+    float x_scale{ }, y_scale{}, z_scale{};
+    float x_scale_aoc{}, y_scale_aoc{}, z_scale_aoc{};
 
     float color_r{}, color_g{}, color_b{};
 
@@ -105,15 +105,59 @@ GLvoid Building_Mat()  // i'am 빌딩 만들기이에요
         for (int j = 0; j < h_f.z_max; ++j) {
             //윗면
             B_Matrix = glm::mat4(1.0f);
-            B_Matrix = glm::translate(B_Matrix, glm::vec3(build[i][j].trans_x, 0.f, build[i][j].trans_z));
+            B_Matrix = glm::translate(B_Matrix, glm::vec3(build[i][j].x_trans, 0.f, build[i][j].z_trans));
+            B_Matrix = glm::scale(B_Matrix, glm::vec3(4.0f, build[i][j].y_scale, 4.0f));
+            B_Matrix = glm::translate(B_Matrix, glm::vec3(0.f, 0.2f, 0.f));
+            unsigned int StransformLocation = glGetUniformLocation(s_program, "transform");
+            glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(B_Matrix));
+            qobj = gluNewQuadric();
+            gluQuadricDrawStyle(qobj, obj_type);
+            int objColorLocation = glGetUniformLocation(s_program, "objectColor");
+            unsigned isCheck = glGetUniformLocation(s_program, "isCheck");
+            glUniform1f(isCheck, false);
+            glUniform4f(objColorLocation, 0.f, 0.5f, 0.5f, 1.0);
+            glBindVertexArray(VAO[0]);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+
+            B_Matrix = glm::mat4(1.0f);
+            B_Matrix = glm::translate(B_Matrix, glm::vec3(build[i][j].x_trans, 0.0f, build[i][j].z_trans));
+            B_Matrix = glm::scale(B_Matrix, glm::vec3(4.0f, build[i][j].y_scale, 4.0f));
+            B_Matrix = glm::translate(B_Matrix, glm::vec3(0.f, 0.2f, 0.f));
+            StransformLocation = glGetUniformLocation(s_program, "transform");
+            glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(B_Matrix));
+            qobj = gluNewQuadric();
+            gluQuadricDrawStyle(qobj, obj_type);
+            objColorLocation = glGetUniformLocation(s_program, "objectColor");
+            isCheck = glGetUniformLocation(s_program, "isCheck");
+            glUniform1f(isCheck, false);
+            glUniform4f(objColorLocation, 0.7f, 0.7f, 0.4f, 1.0);
+            glBindVertexArray(VAO[0]);
+            glDrawArrays(GL_TRIANGLES, 30, 6);
+
+            B_Matrix = glm::mat4(1.0f);
+            B_Matrix = glm::translate(B_Matrix, glm::vec3(build[i][j].x_trans, 0.0f, build[i][j].z_trans));
+            B_Matrix = glm::scale(B_Matrix, glm::vec3(4.0f, build[i][j].y_scale, 4.0f));
+            B_Matrix = glm::translate(B_Matrix, glm::vec3(0.f, 0.2f, 0.f));
+            StransformLocation = glGetUniformLocation(s_program, "transform");
+            glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(B_Matrix));
+            qobj = gluNewQuadric();
+            gluQuadricDrawStyle(qobj, obj_type);
+            objColorLocation = glGetUniformLocation(s_program, "objectColor");
+            isCheck = glGetUniformLocation(s_program, "isCheck");
+            glUniform1f(isCheck, false);
+            glUniform4f(objColorLocation, 0.7f, 0.7f, 0.4f, 1.0);
+            glBindVertexArray(VAO[0]);
+            glDrawArrays(GL_TRIANGLES, 6, 24);
         }
     }
 }
 GLvoid Building_Setting()  // i'am 빌딩들 랜덤 생성이에요
 {
 
-    uniform_int_distribution<> dis{ 5,70 };   // 숫자 수정 필요
+    uniform_int_distribution<> dis{ 900,1000 };   // 숫자 수정 필요
     uniform_int_distribution<> disx_z{ 0,2000 };
+    h_f.x_max, h_f.z_max = dis(gen);
+
  
 }
 
@@ -287,7 +331,7 @@ GLvoid InitBuffer()
     glBindVertexArray(VAO[0]);
     glGenBuffers(2, &VBO[0]);
     glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof hexa, hexa, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof build, build, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(0);
 
@@ -318,15 +362,15 @@ void drawScene()
 
         if (i == 0) {
             glViewport(0, 0, width, height);
-            glm::vec3 cameraPos = glm::vec3(pilot.trans_x, pilot.trans_y + 1.5f, pilot.trans_z); //--- 카메라 위치
-            glm::vec3 cameraDirection = glm::vec3(pilot.trans_x, 0.3f, pilot.trans_z - 5); //--- 카메라 바라보는 방향
+            glm::vec3 cameraPos = glm::vec3(pilot.x_trans, pilot.y_trans + 1.5f, pilot.z_trans); //--- 카메라 위치
+            glm::vec3 cameraDirection = glm::vec3(pilot.x_trans, 0.3f, pilot.z_trans - 5); //--- 카메라 바라보는 방향
             glm::vec3 cameraUp = glm::vec3(0.0f, 4.0f, 0.0f); //--- 카메라 위쪽 방향
             glm::mat4 view = glm::mat4(1.0f);
             view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
-            view = glm::translate(view, glm::vec3(pilot.trans_x, pilot.trans_y + 1.0f, pilot.trans_z));
+            view = glm::translate(view, glm::vec3(pilot.x_trans, pilot.y_trans + 1.0f, pilot.z_trans));
             view = glm::rotate(view, glm::radians(CO.camera_drgree_y), glm::vec3(1.0f, 0.0f, 0.0f));
             view = glm::rotate(view, glm::radians(CO.camera_drgree_x), glm::vec3(0.0f, 1.0f, 0.0f));
-            view = glm::translate(view, glm::vec3(-pilot.trans_x, -pilot.trans_y - 1.0f, -pilot.trans_z));
+            view = glm::translate(view, glm::vec3(-pilot.x_trans, -pilot.y_trans - 1.0f, -pilot.z_trans));
 
             unsigned int viewLocation = glGetUniformLocation(s_program, "view"); //--- 뷰잉 변환 설정
             glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
@@ -340,8 +384,8 @@ void drawScene()
         }
         else {
             glViewport(1050, 550, 150, 150);
-            glm::vec3 cameraPos = glm::vec3(pilot.trans_x, 5.0f, pilot.trans_z);         //위치
-            glm::vec3 cameraDirection = glm::vec3(pilot.trans_x, 0.0f, pilot.trans_z);   //바라보는 방향
+            glm::vec3 cameraPos = glm::vec3(pilot.x_trans, 5.0f, pilot.z_trans);         //위치
+            glm::vec3 cameraDirection = glm::vec3(pilot.x_trans, 0.0f, pilot.z_trans);   //바라보는 방향
             glm::vec3 cameraUp = glm::vec3(0.0f, 0.0f, -10.0f);         //카메라 상향
             glm::mat4 view = glm::mat4(1.0f);
             view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
@@ -451,7 +495,7 @@ GLvoid Setting()
 GLvoid Timer(int value)
 {
     if (h_f.x_is_trans) {
-        pilot.trans_x += 0.1;
+        pilot.x_trans += 0.1;
     }
     glutPostRedisplay();
     glutTimerFunc(5, Timer, 1);
