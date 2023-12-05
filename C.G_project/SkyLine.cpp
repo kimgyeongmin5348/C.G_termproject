@@ -6,9 +6,9 @@
 #include <gl/glew.h>
 #include <gl/freeglut.h>
 #include <gl/freeglut_ext.h>
-#include <glm/glm.hpp>
-#include <glm/ext.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <gl/glm/glm.hpp>
+#include <gl/glm/ext.hpp>
+#include <gl/glm/gtc/matrix_transform.hpp>
 #include <random>
 
 #define width 1200
@@ -325,7 +325,6 @@ GLvoid Pilot() // i'am 헬기(조종사) 에요
     H_Matrix = glm::translate(H_Matrix, glm::vec3(0.f, 0.f, pilot.z_trans));
     H_Matrix = glm::translate(H_Matrix, glm::vec3(pilot.x_trans, 0.f, 0.f));
     H_Matrix = glm::rotate(H_Matrix, glm::radians(pilot.y_rotate), glm::vec3(0.f, 1.0f, 0.f));
-    ...
 
 
 
@@ -483,6 +482,7 @@ void main(int argc, char** argv) {
     }
     else
         cout << "INIT<<endl";
+
     InitShader();
     InitBuffer();
     glEnable(GL_DEPTH_TEST);
