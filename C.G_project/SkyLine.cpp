@@ -422,6 +422,7 @@ GLfloat camera_rot;
 GLfloat C_R;
 GLfloat arm_rot;
 GLfloat limit;
+
 GLvoid Pilot() // i'am 헬기(조종사) 에요
 {
     //엔진
@@ -585,7 +586,7 @@ void main(int argc, char** argv) {
         cerr << "NOT INIT" << endl;
     }
     else
-        cout << "INIT<<endl";
+        cout << "INIT" << endl;
 
     InitShader();
     InitBuffer();
