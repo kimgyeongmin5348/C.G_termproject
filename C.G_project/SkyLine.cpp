@@ -1,4 +1,4 @@
-#define _CRT_SECURE_NO_WARNINGS //--- ÇÁ·Î±×·¥ ¸Ç ¾Õ¿¡ ¼±¾ğÇÒ °Í
+#define _CRT_SECURE_NO_WARNINGS //--- í”„ë¡œê·¸ë¨ ë§¨ ì•ì— ì„ ì–¸í•  ê²ƒ
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
@@ -10,8 +10,6 @@
 #include <glm/ext.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <random>
-
-
 
 #define width 1200
 #define height 800
@@ -42,8 +40,8 @@ float bottom[] =
 };
 
 typedef struct object {
-    float x_trans{}, y_trans{}, z_trans{};               // ±âº» ÁÂÇ¥°ª
-    float x_trans_aoc{}, y_trans_aoc{}, z_trans_aoc{};      // ÁÂÇ¥ º¯È­·® aoc - amount of change
+    float x_trans{}, y_trans{}, z_trans{};               // ê¸°ë³¸ ì¢Œí‘œê°’
+    float x_trans_aoc{}, y_trans_aoc{}, z_trans_aoc{};      // ì¢Œí‘œ ë³€í™”ëŸ‰ aoc - amount of change
 
     float x_rotate{}, y_rotate{}, z_rotate{};            // trans(x_trans + x_trans_aoc, 0.0f, 0.0f)
     float x_rotate_aoc{}, y_rotate_aoc{}, z_rotate_aoc{};   // You know what im say??
@@ -88,127 +86,8 @@ struct Camera_Option {
 Camera_Option CO, C1;
 
 GLvoid Setting();
-GLint Collision(float first_x1, float first_x2, float last_x1, float last_x2)  // i'am Ãæµ¹Ã¼Å©¿¡¿ä
-{
-    if (first_x1 <= last_x1 && last_x1 <= first_x2)
-        return 1;
-    if (first_x1 <= last_x2 && last_x2 <= first_x2)
-        return 1;
-    if (last_x1 <= first_x1 && first_x1 <= last_x2)
-        return 1;
-    if (last_x1 <= first_x2 && first_x2 <= last_x2)
-        return 1;
-    return 0;
-}
-GLvoid Building_Mat()  // i'am ºôµù ¸¸µé±âÀÌ¿¡¿ä
-{
-    /*glm::mat4 B_Matrix = glm::mat4(1.0f);
-    for (int i = 0; i < h_f.x_max; ++i) {
-        for (int j = 0; j < h_f.z_max; ++j) {
-            //À­¸é
-            B_Matrix = glm::mat4(1.0f);
-            B_Matrix = glm::translate(B_Matrix, glm::vec3(build[i][j].x_trans, 0.f, build[i][j].z_trans));
-            B_Matrix = glm::scale(B_Matrix, glm::vec3(4.0f, build[i][j].y_scale, 4.0f));
-            B_Matrix = glm::translate(B_Matrix, glm::vec3(0.f, 0.2f, 0.f));
-            unsigned int StransformLocation = glGetUniformLocation(s_program, "transform");
-            glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(B_Matrix));
-            qobj = gluNewQuadric();
-            gluQuadricDrawStyle(qobj, obj_type);
-            int objColorLocation = glGetUniformLocation(s_program, "objectColor");
-            unsigned isCheck = glGetUniformLocation(s_program, "isCheck");
-            glUniform1f(isCheck, false);
-            glUniform4f(objColorLocation, 0.f, 0.5f, 0.5f, 1.0);
-            glBindVertexArray(VAO[0]);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-
-            B_Matrix = glm::mat4(1.0f);
-            B_Matrix = glm::translate(B_Matrix, glm::vec3(build[i][j].x_trans, 0.0f, build[i][j].z_trans));
-            B_Matrix = glm::scale(B_Matrix, glm::vec3(4.0f, build[i][j].y_scale, 4.0f));
-            B_Matrix = glm::translate(B_Matrix, glm::vec3(0.f, 0.2f, 0.f));
-            StransformLocation = glGetUniformLocation(s_program, "transform");
-            glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(B_Matrix));
-            qobj = gluNewQuadric();
-            gluQuadricDrawStyle(qobj, obj_type);
-            objColorLocation = glGetUniformLocation(s_program, "objectColor");
-            isCheck = glGetUniformLocation(s_program, "isCheck");
-            glUniform1f(isCheck, false);
-            glUniform4f(objColorLocation, 0.7f, 0.7f, 0.4f, 1.0);
-            glBindVertexArray(VAO[0]);
-            glDrawArrays(GL_TRIANGLES, 30, 6);
-
-            B_Matrix = glm::mat4(1.0f);
-            B_Matrix = glm::translate(B_Matrix, glm::vec3(build[i][j].x_trans, 0.0f, build[i][j].z_trans));
-            B_Matrix = glm::scale(B_Matrix, glm::vec3(4.0f, build[i][j].y_scale, 4.0f));
-            B_Matrix = glm::translate(B_Matrix, glm::vec3(0.f, 0.2f, 0.f));
-            StransformLocation = glGetUniformLocation(s_program, "transform");
-            glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(B_Matrix));
-            qobj = gluNewQuadric();
-            gluQuadricDrawStyle(qobj, obj_type);
-            objColorLocation = glGetUniformLocation(s_program, "objectColor");
-            isCheck = glGetUniformLocation(s_program, "isCheck");
-            glUniform1f(isCheck, false);
-            glUniform4f(objColorLocation, 0.7f, 0.7f, 0.4f, 1.0);
-            glBindVertexArray(VAO[0]);
-            glDrawArrays(GL_TRIANGLES, 6, 24);
-        }
-    }*/
-}
-GLvoid Building_Setting()  // i'am ºôµùµé ·£´ı »ı¼ºÀÌ¿¡¿ä
-{
-
-    /*uniform_int_distribution<> dis{900,1000};   // ¼ıÀÚ ¼öÁ¤ ÇÊ¿ä
-    uniform_int_distribution<> disx_z{ 0,2000 };
-    h_f.x_max, h_f.z_max = dis(gen);
-    */
- 
-}
-
-
-GLfloat rot;
-GLfloat rot_t;
-GLfloat camera_rot;
-GLfloat C_R;
-GLfloat arm_rot;
-GLfloat limit;
-GLvoid Pilot() // i'am Çï±â(Á¶Á¾»ç) ¿¡¿ä
-{
-
-   
-
-}
-
-GLvoid Pilot_collison()  // i'am Çï±â Ãæµ¹ Ã¼Å©¿¡¿ä (vs °Ç¹°) ÃÑ¾Ë ¹ß»ç ÇÏ¸é ÀÌ±è -> ÃÑ¾Ë Ãæµ¹Ã¼Å©µµ ÇØ¾ßÇÒµí?
-{
-    
-}
-
-GLvoid Gun() //i'am ÃÑ¾ËÀÌ¿¡¿ä
-{
-
-}
-
-GLvoid Gun_collision() // i'am ÃÑ¾Ë Ãæµ¹Ã¼Å©¿¡¿ä
-{
-
-}
-GLvoid BackGround() //i'am ÁöÇüÀÌ¿¡¿ä    < -   ÀÌ¹ø ¼÷Á¦¸¦ ¹ÙÅÁÀ¸·Î ÁöÇüÀÌ ¿Ã¶ó¿À°Ô ¸¸µé°í ¿ä¸®ÇÇÇÏ°í ÃÑ¾Ë·Î ºÎ¼ö¸é¼­ °¡´Â °ÔÀÓÀ» ÇÔ ¸¸µé¾î º¼±î? ¹Ì·Î Ã£±â ¸¶³É... Èì... ÀÌ°Ç ÀÏ´Ü º¸·ù
-{
-    glm::mat4 Bottom = glm::mat4(1.0f);
-    Bottom = glm::scale(Bottom, glm::vec3(1000.0f, 0.f, 1000.0f));
-    unsigned int StransformLocation = glGetUniformLocation(s_program, "transform");
-    glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(Bottom));
-    qobj = gluNewQuadric();
-    gluQuadricDrawStyle(qobj, obj_type);
-    int objColorLocation = glGetUniformLocation(s_program, "objectColor");
-    unsigned isCheck = glGetUniformLocation(s_program, "isCheck");
-    glUniform1f(isCheck, false);
-    glUniform4f(objColorLocation, 0.7f, 0.7f, 0.4f, 1.0);
-    glBindVertexArray(VAO[1]);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-}
-//
-GLfloat hexa[] = {   //À°¸éÃ¼
-    //À­¸é
+GLfloat hexa[] = {   //ìœ¡ë©´ì²´
+    //ìœ—ë©´
     -h_vertex, h_vertex, h_vertex,
     h_vertex, h_vertex, h_vertex,
     -h_vertex, h_vertex, -h_vertex,
@@ -216,7 +95,7 @@ GLfloat hexa[] = {   //À°¸éÃ¼
     h_vertex, h_vertex, h_vertex,
     h_vertex, h_vertex, -h_vertex,
     -h_vertex, h_vertex, -h_vertex,
-    //Á¤¸é
+    //ì •ë©´
     -h_vertex, -h_vertex, h_vertex,
     h_vertex, -h_vertex, h_vertex,
     -h_vertex, h_vertex, h_vertex,
@@ -225,7 +104,7 @@ GLfloat hexa[] = {   //À°¸éÃ¼
     h_vertex, h_vertex, h_vertex,
     -h_vertex, h_vertex, h_vertex,
 
-    //¾Æ·§¸é
+    //ì•„ë«ë©´
     -h_vertex, -h_vertex, h_vertex,
     -h_vertex, -h_vertex, -h_vertex,
     h_vertex, -h_vertex, -h_vertex,
@@ -234,7 +113,7 @@ GLfloat hexa[] = {   //À°¸éÃ¼
     h_vertex, -h_vertex, -h_vertex,
     h_vertex, -h_vertex, h_vertex,
 
-    //µŞ¸é
+    //ë’·ë©´
     h_vertex, -h_vertex, -h_vertex,
     -h_vertex, -h_vertex, -h_vertex,
     h_vertex, h_vertex, -h_vertex,
@@ -244,7 +123,7 @@ GLfloat hexa[] = {   //À°¸éÃ¼
     h_vertex, h_vertex, -h_vertex,
 
 
-    //ÁÂÃø¸é
+    //ì¢Œì¸¡ë©´
     -h_vertex, -h_vertex, -h_vertex,
     -h_vertex, h_vertex, h_vertex,
     -h_vertex, h_vertex, -h_vertex,
@@ -253,7 +132,7 @@ GLfloat hexa[] = {   //À°¸éÃ¼
     -h_vertex, -h_vertex, h_vertex,
     -h_vertex, h_vertex, h_vertex,
 
-    //¿ìÃø¸é
+    //ìš°ì¸¡ë©´
     h_vertex, -h_vertex, h_vertex,
     h_vertex, -h_vertex, -h_vertex,
     h_vertex, h_vertex, h_vertex,
@@ -346,27 +225,157 @@ GLvoid InitBuffer()
 
 
 
-    glUseProgram(s_program);
-    unsigned int lightPosLocation = glGetUniformLocation(s_program, "lightPos"); //--- lightPos °ª Àü´Ş: (0.0, 0.0, 5.0);
+    /*glUseProgram(s_program);
+    unsigned int lightPosLocation = glGetUniformLocation(s_program, "lightPos"); //--- lightPos ê°’ ì „ë‹¬: (0.0, 0.0, 5.0);
     glUniform3f(lightPosLocation, 5.0f, 10.0f, 0.0f);
-    unsigned int lightColorLocation = glGetUniformLocation(s_program, "lightColor"); //--- lightColor °ª Àü´Ş: (1.0, 1.0, 1.0) ¹é»ö
+    unsigned int lightColorLocation = glGetUniformLocation(s_program, "lightColor"); //--- lightColor ê°’ ì „ë‹¬: (1.0, 1.0, 1.0) ë°±ìƒ‰
     glUniform3f(lightColorLocation, 1.0f, 1.0f, 1.0f);
-    unsigned int objColorLocation = glGetUniformLocation(s_program, "objectColor"); //--- object Color°ª Àü´Ş: (1.0, 0.5, 0.3)ÀÇ »ö
-    glUniform3f(objColorLocation, 0.7f, 0.7f, 0.4f);
+    unsigned int objColorLocation = glGetUniformLocation(s_program, "objectColor"); //--- object Colorê°’ ì „ë‹¬: (1.0, 0.5, 0.3)ì˜ ìƒ‰
+    glUniform3f(objColorLocation, 0.7f, 0.7f, 0.4f);*/
 
 }
+
+GLint Collision(float first_x1, float first_x2, float last_x1, float last_x2)  // i'am ì¶©ëŒì²´í¬ì—ìš”
+{
+    if (first_x1 <= last_x1 && last_x1 <= first_x2)
+        return 1;
+    if (first_x1 <= last_x2 && last_x2 <= first_x2)
+        return 1;
+    if (last_x1 <= first_x1 && first_x1 <= last_x2)
+        return 1;
+    if (last_x1 <= first_x2 && first_x2 <= last_x2)
+        return 1;
+    return 0;
+}
+
+GLvoid Building_Mat()  // i'am ë¹Œë”© ë§Œë“¤ê¸°ì´ì—ìš”
+{
+    glm::mat4 B_Matrix = glm::mat4(1.0f);
+    for (int i = 0; i < h_f.x_max; ++i) {
+        for (int j = 0; j < h_f.z_max; ++j) {
+            //ìœ—ë©´
+            B_Matrix = glm::mat4(1.0f);
+            B_Matrix = glm::translate(B_Matrix, glm::vec3(build[i][j].x_trans, 0.f, build[i][j].z_trans));
+            B_Matrix = glm::scale(B_Matrix, glm::vec3(4.0f, build[i][j].y_scale, 4.0f));
+            B_Matrix = glm::translate(B_Matrix, glm::vec3(0.f, 0.2f, 0.f));
+            unsigned int StransformLocation = glGetUniformLocation(s_program, "transform");
+            glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(B_Matrix));
+            qobj = gluNewQuadric();
+            gluQuadricDrawStyle(qobj, obj_type);
+            int objColorLocation = glGetUniformLocation(s_program, "objectColor");
+            unsigned isCheck = glGetUniformLocation(s_program, "isCheck");
+            glUniform1f(isCheck, false);
+            glUniform4f(objColorLocation, 0.f, 0.5f, 0.5f, 1.0);
+            glBindVertexArray(VAO[0]);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+
+            B_Matrix = glm::mat4(1.0f);
+            B_Matrix = glm::translate(B_Matrix, glm::vec3(build[i][j].x_trans, 0.0f, build[i][j].z_trans));
+            B_Matrix = glm::scale(B_Matrix, glm::vec3(4.0f, build[i][j].y_scale, 4.0f));
+            B_Matrix = glm::translate(B_Matrix, glm::vec3(0.f, 0.2f, 0.f));
+            StransformLocation = glGetUniformLocation(s_program, "transform");
+            glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(B_Matrix));
+            qobj = gluNewQuadric();
+            gluQuadricDrawStyle(qobj, obj_type);
+            objColorLocation = glGetUniformLocation(s_program, "objectColor");
+            isCheck = glGetUniformLocation(s_program, "isCheck");
+            glUniform1f(isCheck, false);
+            glUniform4f(objColorLocation, 0.7f, 0.7f, 0.4f, 1.0);
+            glBindVertexArray(VAO[0]);
+            glDrawArrays(GL_TRIANGLES, 30, 6);
+
+            B_Matrix = glm::mat4(1.0f);
+            B_Matrix = glm::translate(B_Matrix, glm::vec3(build[i][j].x_trans, 0.0f, build[i][j].z_trans));
+            B_Matrix = glm::scale(B_Matrix, glm::vec3(4.0f, build[i][j].y_scale, 4.0f));
+            B_Matrix = glm::translate(B_Matrix, glm::vec3(0.f, 0.2f, 0.f));
+            StransformLocation = glGetUniformLocation(s_program, "transform");
+            glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(B_Matrix));
+            qobj = gluNewQuadric();
+            gluQuadricDrawStyle(qobj, obj_type);
+            objColorLocation = glGetUniformLocation(s_program, "objectColor");
+            isCheck = glGetUniformLocation(s_program, "isCheck");
+            glUniform1f(isCheck, false);
+            glUniform4f(objColorLocation, 0.7f, 0.7f, 0.4f, 1.0);
+            glBindVertexArray(VAO[0]);
+            glDrawArrays(GL_TRIANGLES, 6, 24);
+        }
+    }
+}
+GLvoid Building_Setting()  // i'am ë¹Œë”©ë“¤ ëœë¤ ìƒì„±ì´ì—ìš”
+{
+
+    uniform_int_distribution<> dis{ 900,1000 };   // ìˆ«ì ìˆ˜ì • í•„ìš”
+    uniform_int_distribution<> disx_z{ 0,2000 };
+    h_f.x_max, h_f.z_max = dis(gen);
+
+
+}
+
+
+GLfloat rot;
+GLfloat rot_t;
+GLfloat camera_rot;
+GLfloat C_R;
+GLfloat arm_rot;
+GLfloat limit;
+GLvoid Pilot() // i'am í—¬ê¸°(ì¡°ì¢…ì‚¬) ì—ìš”
+{
+    //ì—”ì§„
+    glm::mat4 H_Matrix = glm::mat4(1.0f);
+    H_Matrix = glm::translate(H_Matrix, glm::vec3(0.f, 0.f, pilot.z_trans));
+    H_Matrix = glm::translate(H_Matrix, glm::vec3(pilot.x_trans, 0.f, 0.f));
+    H_Matrix = glm::rotate(H_Matrix, glm::radians(pilot.y_rotate), glm::vec3(0.f, 1.0f, 0.f));
+    ...
+
+
+
+
+
+}
+
+GLvoid Pilot_collison()  // i'am í—¬ê¸° ì¶©ëŒ ì²´í¬ì—ìš” (vs ê±´ë¬¼) ì´ì•Œ ë°œì‚¬ í•˜ë©´ ì´ê¹€ -> ì´ì•Œ ì¶©ëŒì²´í¬ë„ í•´ì•¼í• ë“¯?
+{
+
+}
+
+GLvoid Gun() //i'am ì´ì•Œì´ì—ìš”
+{
+
+}
+
+GLvoid Gun_collision() // i'am ì´ì•Œ ì¶©ëŒì²´í¬ì—ìš”
+{
+
+}
+GLvoid BackGround() //i'am ì§€í˜•ì´ì—ìš”    < -   ì´ë²ˆ ìˆ™ì œë¥¼ ë°”íƒ•ìœ¼ë¡œ ì§€í˜•ì´ ì˜¬ë¼ì˜¤ê²Œ ë§Œë“¤ê³  ìš”ë¦¬í”¼í•˜ê³  ì´ì•Œë¡œ ë¶€ìˆ˜ë©´ì„œ ê°€ëŠ” ê²Œì„ì„ í•¨ ë§Œë“¤ì–´ ë³¼ê¹Œ? ë¯¸ë¡œ ì°¾ê¸° ë§ˆëƒ¥... í ... ì´ê±´ ì¼ë‹¨ ë³´ë¥˜
+{
+    /*glm::mat4 Bottom = glm::mat4(1.0f);
+    Bottom = glm::scale(Bottom, glm::vec3(1000.0f, 0.f, 1000.0f));
+    unsigned int StransformLocation = glGetUniformLocation(s_program, "transform");
+    glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(Bottom));
+    qobj = gluNewQuadric();
+    gluQuadricDrawStyle(qobj, obj_type);
+    int objColorLocation = glGetUniformLocation(s_program, "objectColor");
+    unsigned isCheck = glGetUniformLocation(s_program, "isCheck");
+    glUniform1f(isCheck, false);
+    glUniform4f(objColorLocation, 0.7f, 0.7f, 0.4f, 1.0);
+    glBindVertexArray(VAO[1]);
+    glDrawArrays(GL_TRIANGLES, 0, 6);*/
+}
+//
+
 void drawScene()
 {
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //±íÀÌ Ã¼Å© (ÄÃ¸µ)
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //ê¹Šì´ ì²´í¬ (ì»¬ë§)
     glUseProgram(s_program);
     for (int i = 0; i < 2; ++i) {
 
         if (i == 0) {
             glViewport(0, 0, width, height);
-            glm::vec3 cameraPos = glm::vec3(pilot.x_trans, pilot.y_trans + 1.5f, pilot.z_trans); //--- Ä«¸Ş¶ó À§Ä¡
-            glm::vec3 cameraDirection = glm::vec3(pilot.x_trans, 0.3f, pilot.z_trans - 5); //--- Ä«¸Ş¶ó ¹Ù¶óº¸´Â ¹æÇâ
-            glm::vec3 cameraUp = glm::vec3(0.0f, 4.0f, 0.0f); //--- Ä«¸Ş¶ó À§ÂÊ ¹æÇâ
+            glm::vec3 cameraPos = glm::vec3(pilot.x_trans, pilot.y_trans + 1.5f, pilot.z_trans); //--- ì¹´ë©”ë¼ ìœ„ì¹˜
+            glm::vec3 cameraDirection = glm::vec3(pilot.x_trans, 0.3f, pilot.z_trans - 5); //--- ì¹´ë©”ë¼ ë°”ë¼ë³´ëŠ” ë°©í–¥
+            glm::vec3 cameraUp = glm::vec3(0.0f, 4.0f, 0.0f); //--- ì¹´ë©”ë¼ ìœ„ìª½ ë°©í–¥
             glm::mat4 view = glm::mat4(1.0f);
             view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
             view = glm::translate(view, glm::vec3(pilot.x_trans, pilot.y_trans + 1.0f, pilot.z_trans));
@@ -374,7 +383,7 @@ void drawScene()
             view = glm::rotate(view, glm::radians(CO.camera_drgree_x), glm::vec3(0.0f, 1.0f, 0.0f));
             view = glm::translate(view, glm::vec3(-pilot.x_trans, -pilot.y_trans - 1.0f, -pilot.z_trans));
 
-            unsigned int viewLocation = glGetUniformLocation(s_program, "view"); //--- ºäÀ× º¯È¯ ¼³Á¤
+            unsigned int viewLocation = glGetUniformLocation(s_program, "view"); //--- ë·°ì‰ ë³€í™˜ ì„¤ì •
             glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
 
             glm::mat4 projection = glm::mat4(1.0f);
@@ -386,9 +395,9 @@ void drawScene()
         }
         else {
             glViewport(1050, 550, 150, 150);
-            glm::vec3 cameraPos = glm::vec3(pilot.x_trans, 5.0f, pilot.z_trans);         //À§Ä¡
-            glm::vec3 cameraDirection = glm::vec3(pilot.x_trans, 0.0f, pilot.z_trans);   //¹Ù¶óº¸´Â ¹æÇâ
-            glm::vec3 cameraUp = glm::vec3(0.0f, 0.0f, -10.0f);         //Ä«¸Ş¶ó »óÇâ
+            glm::vec3 cameraPos = glm::vec3(pilot.x_trans, 5.0f, pilot.z_trans);         //ìœ„ì¹˜
+            glm::vec3 cameraDirection = glm::vec3(pilot.x_trans, 0.0f, pilot.z_trans);   //ë°”ë¼ë³´ëŠ” ë°©í–¥
+            glm::vec3 cameraUp = glm::vec3(0.0f, 0.0f, -10.0f);         //ì¹´ë©”ë¼ ìƒí–¥
             glm::mat4 view = glm::mat4(1.0f);
             view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
 
@@ -401,8 +410,8 @@ void drawScene()
             glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
 
         }
-        
-       
+
+
         Building_Mat();
         Pilot();
         Pilot_collison();
@@ -421,7 +430,7 @@ void Reshape(int w, int h) {
 
 }
 GLvoid KeyBoardUp(unsigned char key, int x, int y) {
-    
+
     glutPostRedisplay();
 }
 GLvoid KeyBoard(unsigned char key, int x, int y) {
@@ -433,7 +442,7 @@ GLvoid KeyBoard(unsigned char key, int x, int y) {
         break;
     case 'x':
         h_f.x_is_trans = !h_f.x_is_trans;
-        cout << "xÃà ÀÌµ¿(Ä«¸Ş¶ó°¡)" << endl;
+        cout << "xì¶• ì´ë™(ì¹´ë©”ë¼ê°€)" << endl;
     }
     glutPostRedisplay();
 }
@@ -450,11 +459,11 @@ GLvoid SpecialKeyBoardUp(int key, int x, int y)
 }
 void Mouse(int button, int state, int x, int y)
 {
-   
+
 }
 void Motion(int x, int y)
 {
-   
+
 }
 void MouseChange(int x, int y) {
 
@@ -492,7 +501,7 @@ void main(int argc, char** argv) {
 }
 GLvoid Setting()
 {
-   
+
 }
 GLvoid Timer(int value)
 {
