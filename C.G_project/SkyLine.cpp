@@ -11,6 +11,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <random>
 
+
+//test testtes 
+
 #define width 1200
 #define height 800
 #define h_vertex 0.1f
@@ -100,7 +103,7 @@ GLint Collision(float first_x1, float first_x2, float last_x1, float last_x2)  /
 }
 GLvoid Building_Mat()  // i'am 빌딩 만들기이에요
 {
-    glm::mat4 B_Matrix = glm::mat4(1.0f);
+    /*glm::mat4 B_Matrix = glm::mat4(1.0f);
     for (int i = 0; i < h_f.x_max; ++i) {
         for (int j = 0; j < h_f.z_max; ++j) {
             //윗면
@@ -149,15 +152,15 @@ GLvoid Building_Mat()  // i'am 빌딩 만들기이에요
             glBindVertexArray(VAO[0]);
             glDrawArrays(GL_TRIANGLES, 6, 24);
         }
-    }
+    }*/
 }
 GLvoid Building_Setting()  // i'am 빌딩들 랜덤 생성이에요
 {
 
-    uniform_int_distribution<> dis{ 900,1000 };   // 숫자 수정 필요
+    /*uniform_int_distribution<> dis{900,1000};   // 숫자 수정 필요
     uniform_int_distribution<> disx_z{ 0,2000 };
     h_f.x_max, h_f.z_max = dis(gen);
-
+    */
  
 }
 
