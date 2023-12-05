@@ -12,7 +12,6 @@
 #include <random>
 
 
-//test testtes 
 
 #define width 1200
 #define height 800
