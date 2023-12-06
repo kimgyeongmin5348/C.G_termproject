@@ -6,10 +6,11 @@
 #include <gl/glew.h>
 #include <gl/freeglut.h>
 #include <gl/freeglut_ext.h>
-#include <glm/glm.hpp>
-#include <glm/ext.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <gl/glm/glm.hpp>
+#include <gl/glm/ext.hpp>
+#include <gl/glm/gtc/matrix_transform.hpp>
 #include <random>
+#include <string>
 
 #define width 1200
 #define height 800
@@ -198,9 +199,9 @@ void InitShader()
         cerr << "ERROR :  fragment Shader Fail Compile \n" << errorLog << endl;
         exit(-1);
     }
-
     else
         cout << "good" << endl;
+
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
     glUseProgram(s_program);
@@ -233,6 +234,107 @@ GLvoid InitBuffer()
     unsigned int objColorLocation = glGetUniformLocation(s_program, "objectColor"); //--- object Color값 전달: (1.0, 0.5, 0.3)의 색
     glUniform3f(objColorLocation, 0.7f, 0.7f, 0.4f);*/
 
+}
+
+void ReadObj(const std::string objfilename, std::vector<glm::vec3>& vertex, std::vector<glm::vec3>& normalVertex, std::vector<glm::vec2>& vtVertex)
+{
+    int lineCount = 0;
+    std::string line;
+    std::string check[6];
+    int vertexNum = 0;
+    int normalNum = 0;
+    int cordiNum = 0;
+    std::ifstream inFile(objfilename);
+    std::vector<glm::vec4>face;
+    std::vector<glm::vec4>Noramlface;
+    std::vector<glm::vec4>vtface;
+    while (std::getline(inFile, line)) {
+        if (line[0] == 'v' && line[1] == ' ') {
+            vertexNum++;
+        }
+        if (line[0] == 'v' && line[1] == 'n') {
+            normalNum++;
+        }
+        if (line[0] == 'v' && line[1] == 't') {
+            cordiNum++;
+        }
+        std::cout << line << std::endl;
+    }
+    glm::vec4* vertexData = new glm::vec4[vertexNum];
+    glm::vec4* normalData = new glm::vec4[normalNum];
+    glm::vec2* cordinaterData = new glm::vec2[cordiNum];
+
+    inFile.clear();
+    inFile.seekg(0, std::ios::beg);
+    vertexNum = 0;
+    normalNum = 0;
+    cordiNum = 0;
+    char head[2];
+    int faceNum[3];
+    int vnNum[3];
+    int vtNum[3];
+    std::string nt;
+    char n;
+    char s;
+    while (inFile >> std::noskipws >> head[0]) {
+        if (head[0] == 'v') {
+            inFile >> std::noskipws >> head[1];
+            if (head[1] == ' ') {
+                inFile >> std::skipws >> vertexData[vertexNum].x >> vertexData[vertexNum].y >> vertexData[vertexNum].z;
+                vertexNum++;
+            }
+            else if (head[1] == 'n') {
+                inFile >> std::skipws >> normalData[normalNum].x >> normalData[normalNum].y >> normalData[normalNum].z;
+                normalNum++;
+            }
+            else if (head[1] == 't') {
+                float trash;
+                inFile >> std::skipws >> cordinaterData[cordiNum].x >> cordinaterData[cordiNum].y >> trash;
+                cordiNum++;
+            }
+            head[1] = '\0';
+        }
+        if (head[0] == 'f') {
+            inFile >> std::noskipws >> head[1];
+            if (head[1] == ' ') {
+                for (int i = 0; i < 3; ++i) {
+                    inFile >> std::skipws >> faceNum[i] >> std::noskipws >> n >> vtNum[i] >> std::noskipws >> s >> vnNum[i];
+                    // 4개의 인덱스를 처리하려면 위 줄을 주석 해제하고, 아래 주석 처리된 줄을 사용하세요.
+                    // inFile >> std::skipws >> faceNum[i] >> std::noskipws >> n >> vtNum[i] >> std::noskipws >> s >> vnNum[i] >> std::noskipws >> trash;
+                }
+
+                glm::vec4 temp = glm::vec4(faceNum[0], faceNum[1], faceNum[2], 1);//faceNum[3]
+                glm::vec4 vttemp = glm::vec4(vtNum[0], vtNum[1], vtNum[2], 1); //vtNum[3]
+                glm::vec4 vntemp = glm::vec4(vnNum[0], vnNum[1], vnNum[2], 1);//vnNum[3]
+                face.push_back(temp);
+                vtface.push_back(vttemp);
+                Noramlface.push_back(vntemp);
+            }
+            head[1] = '\0';
+        }
+    }
+    for (auto iter = face.begin(); iter < face.end(); iter++) {
+        vertex.push_back(vertexData[(int)(iter->x) - 1]);
+        vertex.push_back(vertexData[(int)(iter->y) - 1]);
+        vertex.push_back(vertexData[(int)(iter->z) - 1]);                     //버텍스 좌표
+        //vertex.push_back(vertexData[(int)(iter->w) - 1]);
+    }
+    for (auto iter = vtface.begin(); iter < vtface.end(); iter++) {
+        vtVertex.push_back(cordinaterData[(int)(iter->x) - 1]);
+        vtVertex.push_back(cordinaterData[(int)(iter->y) - 1]);
+        vtVertex.push_back(cordinaterData[(int)(iter->z) - 1]);                //텍스쳐 좌표
+        //ve``rtex.push_back(vertexData[(int)(iter->w) - 1]);
+    }
+    for (auto iter = Noramlface.begin(); iter < Noramlface.end(); iter++) {
+        normalVertex.push_back(normalData[(int)(iter->x) - 1]);
+        normalVertex.push_back(normalData[(int)(iter->y) - 1]);
+        normalVertex.push_back(normalData[(int)(iter->z) - 1]);               //노멀 좌표
+        //normalVertex.push_back(normalData[(int)(iter->w) - 1]);
+    }
+    delete[] vertexData;
+    delete[] cordinaterData;
+    delete[] normalData;
+    inFile.close();
 }
 
 GLint Collision(float first_x1, float first_x2, float last_x1, float last_x2)  // i'am 충돌체크에요
@@ -301,6 +403,8 @@ GLvoid Building_Mat()  // i'am 빌딩 만들기이에요
         }
     }
 }
+
+
 GLvoid Building_Setting()  // i'am 빌딩들 랜덤 생성이에요
 {
 
@@ -318,6 +422,7 @@ GLfloat camera_rot;
 GLfloat C_R;
 GLfloat arm_rot;
 GLfloat limit;
+
 GLvoid Pilot() // i'am 헬기(조종사) 에요
 {
     //엔진
@@ -325,7 +430,6 @@ GLvoid Pilot() // i'am 헬기(조종사) 에요
     H_Matrix = glm::translate(H_Matrix, glm::vec3(0.f, 0.f, pilot.z_trans));
     H_Matrix = glm::translate(H_Matrix, glm::vec3(pilot.x_trans, 0.f, 0.f));
     H_Matrix = glm::rotate(H_Matrix, glm::radians(pilot.y_rotate), glm::vec3(0.f, 1.0f, 0.f));
-    ...
 
 
 
@@ -349,7 +453,7 @@ GLvoid Gun_collision() // i'am 총알 충돌체크에요
 }
 GLvoid BackGround() //i'am 지형이에요    < -   이번 숙제를 바탕으로 지형이 올라오게 만들고 요리피하고 총알로 부수면서 가는 게임을 함 만들어 볼까? 미로 찾기 마냥... 흠... 이건 일단 보류
 {
-    /*glm::mat4 Bottom = glm::mat4(1.0f);
+    glm::mat4 Bottom = glm::mat4(1.0f);
     Bottom = glm::scale(Bottom, glm::vec3(1000.0f, 0.f, 1000.0f));
     unsigned int StransformLocation = glGetUniformLocation(s_program, "transform");
     glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(Bottom));
@@ -360,7 +464,7 @@ GLvoid BackGround() //i'am 지형이에요    < -   이번 숙제를 바탕으�
     glUniform1f(isCheck, false);
     glUniform4f(objColorLocation, 0.7f, 0.7f, 0.4f, 1.0);
     glBindVertexArray(VAO[1]);
-    glDrawArrays(GL_TRIANGLES, 0, 6);*/
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 //
 
@@ -482,7 +586,8 @@ void main(int argc, char** argv) {
         cerr << "NOT INIT" << endl;
     }
     else
-        cout << "INIT<<endl";
+        cout << "INIT" << endl;
+
     InitShader();
     InitBuffer();
     glEnable(GL_DEPTH_TEST);
