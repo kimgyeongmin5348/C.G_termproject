@@ -199,9 +199,9 @@ void InitShader()
         cerr << "ERROR :  fragment Shader Fail Compile \n" << errorLog << endl;
         exit(-1);
     }
-
     else
         cout << "good" << endl;
+
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
     glUseProgram(s_program);
@@ -453,7 +453,7 @@ GLvoid Gun_collision() // i'am 총알 충돌체크에요
 }
 GLvoid BackGround() //i'am 지형이에요    < -   이번 숙제를 바탕으로 지형이 올라오게 만들고 요리피하고 총알로 부수면서 가는 게임을 함 만들어 볼까? 미로 찾기 마냥... 흠... 이건 일단 보류
 {
-    /*glm::mat4 Bottom = glm::mat4(1.0f);
+    glm::mat4 Bottom = glm::mat4(1.0f);
     Bottom = glm::scale(Bottom, glm::vec3(1000.0f, 0.f, 1000.0f));
     unsigned int StransformLocation = glGetUniformLocation(s_program, "transform");
     glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(Bottom));
@@ -464,7 +464,7 @@ GLvoid BackGround() //i'am 지형이에요    < -   이번 숙제를 바탕으�
     glUniform1f(isCheck, false);
     glUniform4f(objColorLocation, 0.7f, 0.7f, 0.4f, 1.0);
     glBindVertexArray(VAO[1]);
-    glDrawArrays(GL_TRIANGLES, 0, 6);*/
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 //
 
