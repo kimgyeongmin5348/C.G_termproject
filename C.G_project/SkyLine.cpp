@@ -6,15 +6,15 @@
 #include <gl/glew.h>
 #include <gl/freeglut.h>
 #include <gl/freeglut_ext.h>
-#include <gl/glm/glm.hpp>
-#include <gl/glm/ext.hpp>
-#include <gl/glm/gtc/matrix_transform.hpp>
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <random>
 #include <string>
 
 #define width 1200
 #define height 800
-#define h_vertex 0.1f
+#define h_vertex 0.2f
 #define pi 3.141592
 using namespace std;
 
@@ -41,15 +41,12 @@ float bottom[] =
 };
 
 typedef struct object {
-    float x_trans{}, y_trans{}, z_trans{};               // 기본 좌표값
-    float x_trans_aoc{}, y_trans_aoc{}, z_trans_aoc{};      // 좌표 변화량 aoc - amount of change
-
-    float x_rotate{}, y_rotate{}, z_rotate{};            // trans(x_trans + x_trans_aoc, 0.0f, 0.0f)
-    float x_rotate_aoc{}, y_rotate_aoc{}, z_rotate_aoc{};   // You know what im say??
-
+    float x_trans{}, y_trans{}, z_trans{};     
+    float x_trans_aoc{}, y_trans_aoc{}, z_trans_aoc{};
+    float x_rotate{}, y_rotate{}, z_rotate{};
+    float x_rotate_aoc{}, y_rotate_aoc{}, z_rotate_aoc{};
     float x_scale{ }, y_scale{}, z_scale{};
     float x_scale_aoc{}, y_scale_aoc{}, z_scale_aoc{};
-
     float color_r{}, color_g{}, color_b{};
 
 
@@ -58,6 +55,13 @@ typedef struct object {
 typedef struct function {
     bool x_is_trans{ false }, y_is_trans{ false }, z_is_trans{ false };
     int x_max{}, z_max{};
+    bool left_walk{ false };
+    bool right_walk{ false };
+    bool front_walk{ false };
+    bool back_walk{ false };
+    bool left_turn{ false };
+    bool first_see{ false };
+
 }F;
 
 O pilot, build[1000][1000], temp_build[1000][1000];
@@ -199,41 +203,12 @@ void InitShader()
         cerr << "ERROR :  fragment Shader Fail Compile \n" << errorLog << endl;
         exit(-1);
     }
+
     else
         cout << "good" << endl;
-
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
     glUseProgram(s_program);
-}
-GLvoid InitBuffer()
-{
-    glGenVertexArrays(3, VAO);
-
-    glBindVertexArray(VAO[0]);
-    glGenBuffers(2, &VBO[0]);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof build, build, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(0);
-
-    glBindVertexArray(VAO[(1)]);
-    glGenBuffers(2, &VBO[1]);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(bottom), bottom, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(0);
-
-
-
-    /*glUseProgram(s_program);
-    unsigned int lightPosLocation = glGetUniformLocation(s_program, "lightPos"); //--- lightPos 값 전달: (0.0, 0.0, 5.0);
-    glUniform3f(lightPosLocation, 5.0f, 10.0f, 0.0f);
-    unsigned int lightColorLocation = glGetUniformLocation(s_program, "lightColor"); //--- lightColor 값 전달: (1.0, 1.0, 1.0) 백색
-    glUniform3f(lightColorLocation, 1.0f, 1.0f, 1.0f);
-    unsigned int objColorLocation = glGetUniformLocation(s_program, "objectColor"); //--- object Color값 전달: (1.0, 0.5, 0.3)의 색
-    glUniform3f(objColorLocation, 0.7f, 0.7f, 0.4f);*/
-
 }
 
 void ReadObj(const std::string objfilename, std::vector<glm::vec3>& vertex, std::vector<glm::vec3>& normalVertex, std::vector<glm::vec2>& vtVertex)
@@ -337,6 +312,36 @@ void ReadObj(const std::string objfilename, std::vector<glm::vec3>& vertex, std:
     inFile.close();
 }
 
+GLvoid InitBuffer()
+{
+    glGenVertexArrays(3, VAO);
+
+    glBindVertexArray(VAO[0]);
+    glGenBuffers(2, &VBO[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(hexa), hexa, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(0);
+
+    glBindVertexArray(VAO[(1)]);
+    glGenBuffers(2, &VBO[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(bottom), bottom, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(0);
+
+
+
+    glUseProgram(s_program);
+    unsigned int lightPosLocation = glGetUniformLocation(s_program, "lightPos"); //--- lightPos 값 전달: (0.0, 0.0, 5.0);
+    glUniform3f(lightPosLocation, 5.0f, 10.0f, 0.0f);
+    unsigned int lightColorLocation = glGetUniformLocation(s_program, "lightColor"); //--- lightColor 값 전달: (1.0, 1.0, 1.0) 백색
+    glUniform3f(lightColorLocation, 1.0f, 1.0f, 1.0f);
+    unsigned int objColorLocation = glGetUniformLocation(s_program, "objectColor"); //--- object Color값 전달: (1.0, 0.5, 0.3)의 색
+    glUniform3f(objColorLocation, 0.7f, 0.7f, 0.4f);
+
+}
+
 GLint Collision(float first_x1, float first_x2, float last_x1, float last_x2)  // i'am 충돌체크에요
 {
     if (first_x1 <= last_x1 && last_x1 <= first_x2)
@@ -403,8 +408,6 @@ GLvoid Building_Mat()  // i'am 빌딩 만들기이에요
         }
     }
 }
-
-
 GLvoid Building_Setting()  // i'am 빌딩들 랜덤 생성이에요
 {
 
@@ -422,14 +425,198 @@ GLfloat camera_rot;
 GLfloat C_R;
 GLfloat arm_rot;
 GLfloat limit;
-
 GLvoid Pilot() // i'am 헬기(조종사) 에요
 {
     //엔진
     glm::mat4 H_Matrix = glm::mat4(1.0f);
-    H_Matrix = glm::translate(H_Matrix, glm::vec3(0.f, 0.f, pilot.z_trans));
-    H_Matrix = glm::translate(H_Matrix, glm::vec3(pilot.x_trans, 0.f, 0.f));
-    H_Matrix = glm::rotate(H_Matrix, glm::radians(pilot.y_rotate), glm::vec3(0.f, 1.0f, 0.f));
+    H_Matrix = glm::translate(H_Matrix, glm::vec3(0.f, 0.f, pilot.z_trans_aoc));  // all
+    H_Matrix = glm::translate(H_Matrix, glm::vec3(pilot.x_trans_aoc, 0.f, 0.f));  // all
+    H_Matrix = glm::rotate(H_Matrix, glm::radians(pilot.y_rotate_aoc), glm::vec3(0.0f, 1.0f, 0.0f));  // only engin ans wings
+    H_Matrix = glm::rotate(H_Matrix, glm::radians(pilot.x_rotate), glm::vec3(1.0f, 0.f, 0.f));  // all
+    H_Matrix = glm::rotate(H_Matrix, glm::radians(pilot.z_rotate), glm::vec3(0.f, 0.f, 1.0f));  // all
+    H_Matrix = glm::translate(H_Matrix, glm::vec3(0.0f, 1.0f, 0.0f));
+    H_Matrix = glm::scale(H_Matrix, glm::vec3(0.2f, 0.5f, 0.2f));
+    unsigned int StransformLocation = glGetUniformLocation(s_program, "transform");
+    glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(H_Matrix));
+    qobj = gluNewQuadric();
+    gluQuadricDrawStyle(qobj, obj_type);
+    int objColorLocation = glGetUniformLocation(s_program, "objectColor");
+    unsigned isCheck = glGetUniformLocation(s_program, "isCheck");
+    glUniform1f(isCheck, false);
+    glUniform4f(objColorLocation, 0.5f, 0.3f, 0.5f, 1.0);
+    glBindVertexArray(VAO[0]);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    //날개 1
+    glm::mat4 H_Matrix1 = glm::mat4(1.0f);
+    H_Matrix1 = glm::translate(H_Matrix1, glm::vec3(0.f, 0.f, pilot.z_trans_aoc));  // all
+    H_Matrix1 = glm::translate(H_Matrix1, glm::vec3(pilot.x_trans_aoc, 0.f, 0.f));  // all
+    H_Matrix1 = glm::rotate(H_Matrix1, glm::radians(pilot.y_rotate_aoc), glm::vec3(0.0f, 1.0f, 0.0f));  // only engin ans wings
+    H_Matrix1 = glm::rotate(H_Matrix1, glm::radians(pilot.x_rotate), glm::vec3(1.0f, 0.f, 0.f));  // all
+    H_Matrix1 = glm::rotate(H_Matrix1, glm::radians(pilot.z_rotate), glm::vec3(0.f, 0.f, 1.0f));  // all
+    H_Matrix1 = glm::translate(H_Matrix1, glm::vec3(0.0f, 1.1f, 0.0f));
+    H_Matrix1 = glm::scale(H_Matrix1, glm::vec3(4.5f, 0.2f, 0.2f));
+    StransformLocation = glGetUniformLocation(s_program, "transform");
+    glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(H_Matrix1));
+    qobj = gluNewQuadric();
+    gluQuadricDrawStyle(qobj, obj_type);
+    objColorLocation = glGetUniformLocation(s_program, "objectColor");
+    isCheck = glGetUniformLocation(s_program, "isCheck");
+    glUniform1f(isCheck, false);
+    glUniform4f(objColorLocation, 0.0f, 0.0f, 1.0f, 1.0);
+    glBindVertexArray(VAO[0]);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    //날개2
+    glm::mat4 H_Matrix2 = glm::mat4(1.0f);
+    H_Matrix2 = glm::translate(H_Matrix2, glm::vec3(0.f, 0.f, pilot.z_trans_aoc));  // all
+    H_Matrix2 = glm::translate(H_Matrix2, glm::vec3(pilot.x_trans_aoc, 0.f, 0.f));  // all
+    H_Matrix2 = glm::rotate(H_Matrix2, glm::radians(pilot.y_rotate_aoc), glm::vec3(0.0f, 1.0f, 0.0f));  // only engin ans wings
+    H_Matrix2 = glm::rotate(H_Matrix2, glm::radians(pilot.x_rotate), glm::vec3(1.0f, 0.f, 0.f));  // all
+    H_Matrix2 = glm::rotate(H_Matrix2, glm::radians(pilot.z_rotate), glm::vec3(0.f, 0.f, 1.0f));  // all
+    H_Matrix2 = glm::translate(H_Matrix2, glm::vec3(0.0f, 1.1f, 0.0f));
+    H_Matrix2 = glm::scale(H_Matrix2, glm::vec3(0.2f, 0.2f, 4.5f));
+    StransformLocation = glGetUniformLocation(s_program, "transform");
+    glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(H_Matrix2));
+    qobj = gluNewQuadric();
+    gluQuadricDrawStyle(qobj, obj_type);
+    objColorLocation = glGetUniformLocation(s_program, "objectColor");
+    isCheck = glGetUniformLocation(s_program, "isCheck");
+    glUniform1f(isCheck, false);
+    glUniform4f(objColorLocation, 0.0f, 0.0f, 1.0f, 1.0);
+    glBindVertexArray(VAO[0]);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    // 몸통 중간
+    glm::mat4 H_Matrix3 = glm::mat4(1.0f);
+    H_Matrix3 = glm::translate(H_Matrix3, glm::vec3(0.f, 0.f, pilot.z_trans_aoc));  // all
+    H_Matrix3 = glm::translate(H_Matrix3, glm::vec3(pilot.x_trans_aoc, 0.f, 0.f));  // all
+    H_Matrix3 = glm::rotate(H_Matrix3, glm::radians(pilot.x_rotate), glm::vec3(1.0f, 0.f, 0.f));  // all
+    H_Matrix3 = glm::rotate(H_Matrix3, glm::radians(pilot.z_rotate), glm::vec3(0.f, 0.f, 1.0f));  // all
+    H_Matrix3 = glm::translate(H_Matrix3, glm::vec3(0.f, 0.7f, -0.2f));
+    H_Matrix3 = glm::scale(H_Matrix3, glm::vec3(1.1f, 1.1f, 3.0f));
+    StransformLocation = glGetUniformLocation(s_program, "transform");
+    glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(H_Matrix3));
+    qobj = gluNewQuadric();
+    gluQuadricDrawStyle(qobj, obj_type);
+    objColorLocation = glGetUniformLocation(s_program, "objectColor");
+    isCheck = glGetUniformLocation(s_program, "isCheck");
+    glUniform1f(isCheck, false);
+    glUniform4f(objColorLocation, 0.0f, 0.0f, 1.0f, 1.0);
+    glBindVertexArray(VAO[0]);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    // 몸통 앞
+    glm::mat4 H_Matrix4 = glm::mat4(1.0f);
+    H_Matrix4 = glm::translate(H_Matrix4, glm::vec3(0.f, 0.f, pilot.z_trans_aoc));
+    H_Matrix4 = glm::translate(H_Matrix4, glm::vec3(pilot.x_trans_aoc, 0.f, 0.f));
+    H_Matrix4 = glm::rotate(H_Matrix4, glm::radians(pilot.x_rotate), glm::vec3(1.0f, 0.f, 0.f));
+    H_Matrix4 = glm::rotate(H_Matrix4, glm::radians(pilot.z_rotate), glm::vec3(0.f, 0.f, 1.0f));
+    H_Matrix4 = glm::translate(H_Matrix4, glm::vec3(0.f, 0.65f, 0.3f));
+    H_Matrix4 = glm::scale(H_Matrix4, glm::vec3(0.3f, 0.3f, 0.4f));
+    StransformLocation = glGetUniformLocation(s_program, "transform");
+    glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(H_Matrix4));
+    objColorLocation = glGetUniformLocation(s_program, "objectColor");
+    isCheck = glGetUniformLocation(s_program, "isCheck");
+    qobj = gluNewQuadric();
+    gluQuadricDrawStyle(qobj, obj_type);
+    glUniform1f(isCheck, false);
+    glUniform4f(objColorLocation, 0.0f, 0.0f, 1.0f, 1.0);
+    gluSphere(qobj, 1.0, 20, 30);
+
+    // 몸통 뒤
+    glm::mat4 H_Matrix5 = glm::mat4(1.0f);
+    H_Matrix5 = glm::translate(H_Matrix5, glm::vec3(0.f, 0.f, pilot.z_trans_aoc));  // all
+    H_Matrix5 = glm::translate(H_Matrix5, glm::vec3(pilot.x_trans_aoc, 0.f, 0.f));  // all
+    H_Matrix5 = glm::rotate(H_Matrix5, glm::radians(pilot.x_rotate), glm::vec3(1.0f, 0.f, 0.f));  // all
+    H_Matrix5 = glm::rotate(H_Matrix5, glm::radians(pilot.z_rotate), glm::vec3(0.f, 0.f, 1.0f));  // all
+    H_Matrix5 = glm::translate(H_Matrix5, glm::vec3(0.f, 0.7f, -1.0f));
+    H_Matrix5 = glm::scale(H_Matrix5, glm::vec3(0.2f, 0.2f, 1.0f));
+    StransformLocation = glGetUniformLocation(s_program, "transform");
+    glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(H_Matrix5));
+    objColorLocation = glGetUniformLocation(s_program, "objectColor");
+    isCheck = glGetUniformLocation(s_program, "isCheck");
+    qobj = gluNewQuadric();
+    gluQuadricDrawStyle(qobj, obj_type);
+    glUniform1f(isCheck, false);
+    glUniform4f(objColorLocation, 0.0f, 0.0f, 1.0f, 1.0);
+    gluCylinder(qobj, 0.3f, 1.1f, 0.5, 100, 1);
+
+    // 몸통 뒤(꼬리앞)
+    glm::mat4 H_Matrix6 = glm::mat4(1.0f);
+    H_Matrix6 = glm::translate(H_Matrix6, glm::vec3(0.f, 0.f, pilot.z_trans_aoc));  // all
+    H_Matrix6 = glm::translate(H_Matrix6, glm::vec3(pilot.x_trans_aoc, 0.f, 0.f));  // all
+    H_Matrix6 = glm::rotate(H_Matrix6, glm::radians(pilot.x_rotate), glm::vec3(1.0f, 0.f, 0.f));  // all
+    H_Matrix6 = glm::rotate(H_Matrix6, glm::radians(pilot.z_rotate), glm::vec3(0.f, 0.f, 1.0f));  // all
+    H_Matrix6 = glm::translate(H_Matrix6, glm::vec3(0.f, 0.7f, -1.7f));
+    H_Matrix6 = glm::scale(H_Matrix6, glm::vec3(0.2f, 0.2f, 1.0f));
+    StransformLocation = glGetUniformLocation(s_program, "transform");
+    glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(H_Matrix6));
+    objColorLocation = glGetUniformLocation(s_program, "objectColor");
+    isCheck = glGetUniformLocation(s_program, "isCheck");
+    qobj = gluNewQuadric();
+    gluQuadricDrawStyle(qobj, obj_type);
+    glUniform1f(isCheck, false);
+    glUniform4f(objColorLocation, 0.0f, 0.0f, 1.0f, 1.0);
+    gluCylinder(qobj, 0.3f, 0.3f, 1.5, 100, 1);
+
+    // 몸통 뒤(꼬리 날개)
+    glm::mat4 H_Matrix7 = glm::mat4(1.0f);
+    H_Matrix7 = glm::translate(H_Matrix7, glm::vec3(0.f, 0.f, pilot.z_trans_aoc));  // all
+    H_Matrix7 = glm::translate(H_Matrix7, glm::vec3(pilot.x_trans_aoc, 0.f, 0.f));  // all
+    H_Matrix7 = glm::rotate(H_Matrix7, glm::radians(pilot.x_rotate), glm::vec3(1.0f, 0.f, 0.f));  // all
+    H_Matrix7 = glm::rotate(H_Matrix7, glm::radians(pilot.z_rotate), glm::vec3(0.f, 0.f, 1.0f));  // all
+    H_Matrix7 = glm::translate(H_Matrix7, glm::vec3(0.f, 0.8f, -1.6f));
+    H_Matrix7 = glm::scale(H_Matrix7, glm::vec3(0.1f, 0.7f, 0.5f));
+    StransformLocation = glGetUniformLocation(s_program, "transform");
+    glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(H_Matrix7));
+    qobj = gluNewQuadric();
+    gluQuadricDrawStyle(qobj, obj_type);
+    objColorLocation = glGetUniformLocation(s_program, "objectColor");
+    isCheck = glGetUniformLocation(s_program, "isCheck");
+    glUniform1f(isCheck, false);
+    glUniform4f(objColorLocation, 0.0f, 0.0f, 1.0f, 1.0);
+    glBindVertexArray(VAO[0]);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    //본체 바닥(왼쪽)
+    H_Matrix = glm::mat4(1.0f);
+    H_Matrix = glm::translate(H_Matrix, glm::vec3(0.f, 0.f, pilot.z_trans_aoc));
+    H_Matrix = glm::translate(H_Matrix, glm::vec3(pilot.x_trans_aoc, 0.f, 0.f));
+    H_Matrix = glm::rotate(H_Matrix, glm::radians(pilot.x_rotate), glm::vec3(1.0f, 0.f, 0.f));  // all
+    H_Matrix = glm::rotate(H_Matrix, glm::radians(pilot.z_rotate), glm::vec3(0.f, 0.f, 1.0f));  // all
+    H_Matrix = glm::translate(H_Matrix, glm::vec3(0.3f, 0.2f, -0.3f));
+    H_Matrix = glm::scale(H_Matrix, glm::vec3(0.2f, 0.2f, 2.5f));
+    StransformLocation = glGetUniformLocation(s_program, "transform");
+    glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(H_Matrix));
+    qobj = gluNewQuadric();
+    gluQuadricDrawStyle(qobj, obj_type);
+    objColorLocation = glGetUniformLocation(s_program, "objectColor");
+    isCheck = glGetUniformLocation(s_program, "isCheck");
+    glUniform1f(isCheck, false);
+    glUniform4f(objColorLocation, 1.0f, 0.3f, 0.7f, 1.0);
+    glBindVertexArray(VAO[0]);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    //본체 바닥2
+    H_Matrix = glm::mat4(1.0f);
+    H_Matrix = glm::translate(H_Matrix, glm::vec3(0.f, 0.f, pilot.z_trans_aoc));
+    H_Matrix = glm::translate(H_Matrix, glm::vec3(pilot.x_trans_aoc, 0.f, 0.f));
+    H_Matrix = glm::rotate(H_Matrix, glm::radians(pilot.x_rotate), glm::vec3(1.0f, 0.f, 0.f));  // all
+    H_Matrix = glm::rotate(H_Matrix, glm::radians(pilot.z_rotate), glm::vec3(0.f, 0.f, 1.0f));  // all
+    H_Matrix = glm::translate(H_Matrix, glm::vec3(-0.3f, 0.2f, -0.3f));
+    H_Matrix = glm::scale(H_Matrix, glm::vec3(0.2f, 0.2f, 2.5f));
+    StransformLocation = glGetUniformLocation(s_program, "transform");
+    glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(H_Matrix));
+    qobj = gluNewQuadric();
+    gluQuadricDrawStyle(qobj, obj_type);
+    objColorLocation = glGetUniformLocation(s_program, "objectColor");
+    isCheck = glGetUniformLocation(s_program, "isCheck");
+    glUniform1f(isCheck, false);
+    glUniform4f(objColorLocation, 1.0f, 0.3f, 0.7f, 1.0);
+    glBindVertexArray(VAO[0]);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    
 
 
 
@@ -453,7 +640,7 @@ GLvoid Gun_collision() // i'am 총알 충돌체크에요
 }
 GLvoid BackGround() //i'am 지형이에요    < -   이번 숙제를 바탕으로 지형이 올라오게 만들고 요리피하고 총알로 부수면서 가는 게임을 함 만들어 볼까? 미로 찾기 마냥... 흠... 이건 일단 보류
 {
-    glm::mat4 Bottom = glm::mat4(1.0f);
+    /*glm::mat4 Bottom = glm::mat4(1.0f);
     Bottom = glm::scale(Bottom, glm::vec3(1000.0f, 0.f, 1000.0f));
     unsigned int StransformLocation = glGetUniformLocation(s_program, "transform");
     glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(Bottom));
@@ -464,7 +651,7 @@ GLvoid BackGround() //i'am 지형이에요    < -   이번 숙제를 바탕으�
     glUniform1f(isCheck, false);
     glUniform4f(objColorLocation, 0.7f, 0.7f, 0.4f, 1.0);
     glBindVertexArray(VAO[1]);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glDrawArrays(GL_TRIANGLES, 0, 6);*/
 }
 //
 
@@ -477,18 +664,38 @@ void drawScene()
 
         if (i == 0) {
             glViewport(0, 0, width, height);
-            glm::vec3 cameraPos = glm::vec3(pilot.x_trans, pilot.y_trans + 1.5f, pilot.z_trans); //--- 카메라 위치
-            glm::vec3 cameraDirection = glm::vec3(pilot.x_trans, 0.3f, pilot.z_trans - 5); //--- 카메라 바라보는 방향
-            glm::vec3 cameraUp = glm::vec3(0.0f, 4.0f, 0.0f); //--- 카메라 위쪽 방향
-            glm::mat4 view = glm::mat4(1.0f);
-            view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
-            view = glm::translate(view, glm::vec3(pilot.x_trans, pilot.y_trans + 1.0f, pilot.z_trans));
-            view = glm::rotate(view, glm::radians(CO.camera_drgree_y), glm::vec3(1.0f, 0.0f, 0.0f));
-            view = glm::rotate(view, glm::radians(CO.camera_drgree_x), glm::vec3(0.0f, 1.0f, 0.0f));
-            view = glm::translate(view, glm::vec3(-pilot.x_trans, -pilot.y_trans - 1.0f, -pilot.z_trans));
+            if (!h_f.first_see) {  // 이건 3인칭 (기본값) => 헬기랑 같이 움직이게 하려 했는데 안된다... 흠... 다시 시도해보자
+                glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, -0.3f);			//위치
+                glm::vec3 cameraDirection = glm::vec3(0.0f, 0.0f, 0.0f);	//바라보는 방향
+                glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);			//카메라 상향
+                glm::mat4 view = glm::mat4(1.0f);
+                view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
 
-            unsigned int viewLocation = glGetUniformLocation(s_program, "view"); //--- 뷰잉 변환 설정
-            glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
+                view = glm::rotate(view, glm::radians(-30.f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+                view = glm::rotate(view, glm::radians(camera.y_rotate_aoc), glm::vec3(0.0f, 1.0f, 0.0f));
+
+                view = glm::translate(view, glm::vec3(pilot.x_trans_aoc, pilot.y_trans_aoc, pilot.z_trans_aoc));
+
+
+                unsigned int viewLocation = glGetUniformLocation(s_program, "view"); //--- 뷰잉 변환 설정
+                glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
+            }
+            else {  // 이거 1인칭 하는건데 왜 안되는 것일까..? 수정 필요 
+                glm::vec3 cameraPos = glm::vec3(0.0f, 0.1f, 4.95f);			//위치
+                glm::vec3 cameraDirection = glm::vec3(0.0f, 0.05f, 5.95f);	//바라보는 방향
+                glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);			//카메라 상향
+                glm::mat4 view = glm::mat4(1.0f);
+                view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
+
+                view = glm::rotate(view, glm::radians(-10.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+                view = glm::rotate(view, glm::radians(-pilot.y_rotate), glm::vec3(0.0f, 1.0f, 0.0f));
+                view = glm::translate(view, glm::vec3(-pilot.x_trans - pilot.x_trans_aoc, 0.0f, -pilot.z_trans - pilot.z_trans_aoc));
+                unsigned int viewLocation = glGetUniformLocation(s_program, "view");
+                glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
+            }
+           
 
             glm::mat4 projection = glm::mat4(1.0f);
             projection = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 50.0f);
@@ -501,7 +708,7 @@ void drawScene()
             glViewport(1050, 550, 150, 150);
             glm::vec3 cameraPos = glm::vec3(pilot.x_trans, 5.0f, pilot.z_trans);         //위치
             glm::vec3 cameraDirection = glm::vec3(pilot.x_trans, 0.0f, pilot.z_trans);   //바라보는 방향
-            glm::vec3 cameraUp = glm::vec3(0.0f, 0.0f, -10.0f);         //카메라 상향
+            glm::vec3 cameraUp = glm::vec3(0.0f, 0.0f, 10.0f);         //카메라 상향
             glm::mat4 view = glm::mat4(1.0f);
             view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
 
@@ -522,6 +729,7 @@ void drawScene()
         Gun();
         Gun_collision();
         BackGround();
+        Building_Setting();
     }
 
     glutSwapBuffers();
@@ -534,7 +742,22 @@ void Reshape(int w, int h) {
 
 }
 GLvoid KeyBoardUp(unsigned char key, int x, int y) {
-
+    switch (key)
+    {
+    case 'a':
+        h_f.left_walk = false;
+        break;
+    case 'd':
+        h_f.right_walk = false;
+        break;
+    case 'w':
+        h_f.front_walk = false;
+        pilot.x_rotate = 0.f;
+        break;
+    case 's':
+        h_f.back_walk = false;
+        break;
+    }
     glutPostRedisplay();
 }
 GLvoid KeyBoard(unsigned char key, int x, int y) {
@@ -547,6 +770,37 @@ GLvoid KeyBoard(unsigned char key, int x, int y) {
     case 'x':
         h_f.x_is_trans = !h_f.x_is_trans;
         cout << "x축 이동(카메라가)" << endl;
+    case 'd':
+        h_f.right_walk = true;
+        cout << "오른쪽으로" << endl;
+        break;
+    case 'a':
+        h_f.left_walk = true;
+        cout << "왼쪽으로" << endl;
+        break;
+    case 'w':
+        h_f.front_walk = true;
+        pilot.x_rotate = 15.0f;
+        cout << "앞으로" << endl;
+        break;
+    case 's':
+        h_f.back_walk = true;
+        cout << "뒤로" << endl;
+        break;
+    case 'm':
+        h_f.left_turn = !h_f.left_turn;
+        break;
+    case 'c':
+        memcpy(&pilot, &temp, sizeof(pilot));
+        memcpy(&camera, &temp, sizeof(camera));
+        memcpy(&h_f, &temp_f, sizeof(h_f));
+        break;
+    case '1':
+        h_f.first_see = true;
+        cout << "1인칭" << endl;
+    case '3':
+        h_f.first_see = false;
+        cout << "3인칭" << endl;
     }
     glutPostRedisplay();
 }
@@ -586,8 +840,7 @@ void main(int argc, char** argv) {
         cerr << "NOT INIT" << endl;
     }
     else
-        cout << "INIT" << endl;
-
+        cout << "INIT<<endl";
     InitShader();
     InitBuffer();
     glEnable(GL_DEPTH_TEST);
@@ -613,6 +866,29 @@ GLvoid Timer(int value)
     if (h_f.x_is_trans) {
         pilot.x_trans += 0.1;
     }
+    if (h_f.right_walk) {
+        if (pilot.x_trans_aoc > -2.5)
+            pilot.x_trans_aoc -= 0.01f;
+    }
+    if (h_f.left_walk) {
+        if (pilot.x_trans_aoc < 2.5)
+            pilot.x_trans_aoc += 0.01f;
+    }
+    if (h_f.back_walk) {
+        pilot.z_trans_aoc -= 0.01f;
+    }
+    if (h_f.front_walk) {
+        pilot.z_trans_aoc += 0.01f;
+    }
+
+
+    if (h_f.left_turn)
+        pilot.y_rotate_aoc++;
+
+
+
+
+
     glutPostRedisplay();
     glutTimerFunc(5, Timer, 1);
 }
