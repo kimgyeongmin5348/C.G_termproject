@@ -41,7 +41,7 @@ float bottom[] =
 };
 
 typedef struct object {
-    float x_trans{}, y_trans{}, z_trans{};     
+    float x_trans{}, y_trans{}, z_trans{};
     float x_trans_aoc{}, y_trans_aoc{}, z_trans_aoc{};
     float x_rotate{}, y_rotate{}, z_rotate{};
     float x_rotate_aoc{}, y_rotate_aoc{}, z_rotate_aoc{};
@@ -61,10 +61,11 @@ typedef struct function {
     bool back_walk{ false };
     bool left_turn{ false };
     bool first_see{ false };
+    bool shoot_bullet{ false };
 
 }F;
 
-O pilot, build[1000][1000], temp_build[1000][1000];
+O pilot, build[1000][1000], temp_build[1000][1000], shoot;
 O temp, camera;
 F h_f, temp_f;
 GLUquadricObj* qobj;
@@ -429,8 +430,7 @@ GLvoid Pilot() // i'am 헬기(조종사) 에요
 {
     //엔진
     glm::mat4 H_Matrix = glm::mat4(1.0f);
-    H_Matrix = glm::translate(H_Matrix, glm::vec3(0.f, 0.f, pilot.z_trans_aoc));  // all
-    H_Matrix = glm::translate(H_Matrix, glm::vec3(pilot.x_trans_aoc, 0.f, 0.f));  // all
+    H_Matrix = glm::translate(H_Matrix, glm::vec3(pilot.x_trans_aoc, pilot.y_trans_aoc, pilot.z_trans_aoc));  // all
     H_Matrix = glm::rotate(H_Matrix, glm::radians(pilot.y_rotate_aoc), glm::vec3(0.0f, 1.0f, 0.0f));  // only engin ans wings
     H_Matrix = glm::rotate(H_Matrix, glm::radians(pilot.x_rotate), glm::vec3(1.0f, 0.f, 0.f));  // all
     H_Matrix = glm::rotate(H_Matrix, glm::radians(pilot.z_rotate), glm::vec3(0.f, 0.f, 1.0f));  // all
@@ -449,8 +449,7 @@ GLvoid Pilot() // i'am 헬기(조종사) 에요
 
     //날개 1
     glm::mat4 H_Matrix1 = glm::mat4(1.0f);
-    H_Matrix1 = glm::translate(H_Matrix1, glm::vec3(0.f, 0.f, pilot.z_trans_aoc));  // all
-    H_Matrix1 = glm::translate(H_Matrix1, glm::vec3(pilot.x_trans_aoc, 0.f, 0.f));  // all
+    H_Matrix1 = glm::translate(H_Matrix1, glm::vec3(pilot.x_trans_aoc, pilot.y_trans_aoc, pilot.z_trans_aoc));  // all
     H_Matrix1 = glm::rotate(H_Matrix1, glm::radians(pilot.y_rotate_aoc), glm::vec3(0.0f, 1.0f, 0.0f));  // only engin ans wings
     H_Matrix1 = glm::rotate(H_Matrix1, glm::radians(pilot.x_rotate), glm::vec3(1.0f, 0.f, 0.f));  // all
     H_Matrix1 = glm::rotate(H_Matrix1, glm::radians(pilot.z_rotate), glm::vec3(0.f, 0.f, 1.0f));  // all
@@ -469,8 +468,7 @@ GLvoid Pilot() // i'am 헬기(조종사) 에요
 
     //날개2
     glm::mat4 H_Matrix2 = glm::mat4(1.0f);
-    H_Matrix2 = glm::translate(H_Matrix2, glm::vec3(0.f, 0.f, pilot.z_trans_aoc));  // all
-    H_Matrix2 = glm::translate(H_Matrix2, glm::vec3(pilot.x_trans_aoc, 0.f, 0.f));  // all
+    H_Matrix2 = glm::translate(H_Matrix2, glm::vec3(pilot.x_trans_aoc, pilot.y_trans_aoc, pilot.z_trans_aoc));  // all
     H_Matrix2 = glm::rotate(H_Matrix2, glm::radians(pilot.y_rotate_aoc), glm::vec3(0.0f, 1.0f, 0.0f));  // only engin ans wings
     H_Matrix2 = glm::rotate(H_Matrix2, glm::radians(pilot.x_rotate), glm::vec3(1.0f, 0.f, 0.f));  // all
     H_Matrix2 = glm::rotate(H_Matrix2, glm::radians(pilot.z_rotate), glm::vec3(0.f, 0.f, 1.0f));  // all
@@ -489,8 +487,7 @@ GLvoid Pilot() // i'am 헬기(조종사) 에요
 
     // 몸통 중간
     glm::mat4 H_Matrix3 = glm::mat4(1.0f);
-    H_Matrix3 = glm::translate(H_Matrix3, glm::vec3(0.f, 0.f, pilot.z_trans_aoc));  // all
-    H_Matrix3 = glm::translate(H_Matrix3, glm::vec3(pilot.x_trans_aoc, 0.f, 0.f));  // all
+    H_Matrix3 = glm::translate(H_Matrix3, glm::vec3(pilot.x_trans_aoc, pilot.y_trans_aoc, pilot.z_trans_aoc));  // all
     H_Matrix3 = glm::rotate(H_Matrix3, glm::radians(pilot.x_rotate), glm::vec3(1.0f, 0.f, 0.f));  // all
     H_Matrix3 = glm::rotate(H_Matrix3, glm::radians(pilot.z_rotate), glm::vec3(0.f, 0.f, 1.0f));  // all
     H_Matrix3 = glm::translate(H_Matrix3, glm::vec3(0.f, 0.7f, -0.2f));
@@ -508,8 +505,7 @@ GLvoid Pilot() // i'am 헬기(조종사) 에요
 
     // 몸통 앞
     glm::mat4 H_Matrix4 = glm::mat4(1.0f);
-    H_Matrix4 = glm::translate(H_Matrix4, glm::vec3(0.f, 0.f, pilot.z_trans_aoc));
-    H_Matrix4 = glm::translate(H_Matrix4, glm::vec3(pilot.x_trans_aoc, 0.f, 0.f));
+    H_Matrix4 = glm::translate(H_Matrix4, glm::vec3(pilot.x_trans_aoc, pilot.y_trans_aoc, pilot.z_trans_aoc));
     H_Matrix4 = glm::rotate(H_Matrix4, glm::radians(pilot.x_rotate), glm::vec3(1.0f, 0.f, 0.f));
     H_Matrix4 = glm::rotate(H_Matrix4, glm::radians(pilot.z_rotate), glm::vec3(0.f, 0.f, 1.0f));
     H_Matrix4 = glm::translate(H_Matrix4, glm::vec3(0.f, 0.65f, 0.3f));
@@ -526,8 +522,7 @@ GLvoid Pilot() // i'am 헬기(조종사) 에요
 
     // 몸통 뒤
     glm::mat4 H_Matrix5 = glm::mat4(1.0f);
-    H_Matrix5 = glm::translate(H_Matrix5, glm::vec3(0.f, 0.f, pilot.z_trans_aoc));  // all
-    H_Matrix5 = glm::translate(H_Matrix5, glm::vec3(pilot.x_trans_aoc, 0.f, 0.f));  // all
+    H_Matrix5 = glm::translate(H_Matrix5, glm::vec3(pilot.x_trans_aoc, pilot.y_trans_aoc, pilot.z_trans_aoc));
     H_Matrix5 = glm::rotate(H_Matrix5, glm::radians(pilot.x_rotate), glm::vec3(1.0f, 0.f, 0.f));  // all
     H_Matrix5 = glm::rotate(H_Matrix5, glm::radians(pilot.z_rotate), glm::vec3(0.f, 0.f, 1.0f));  // all
     H_Matrix5 = glm::translate(H_Matrix5, glm::vec3(0.f, 0.7f, -1.0f));
@@ -544,8 +539,7 @@ GLvoid Pilot() // i'am 헬기(조종사) 에요
 
     // 몸통 뒤(꼬리앞)
     glm::mat4 H_Matrix6 = glm::mat4(1.0f);
-    H_Matrix6 = glm::translate(H_Matrix6, glm::vec3(0.f, 0.f, pilot.z_trans_aoc));  // all
-    H_Matrix6 = glm::translate(H_Matrix6, glm::vec3(pilot.x_trans_aoc, 0.f, 0.f));  // all
+    H_Matrix6 = glm::translate(H_Matrix6, glm::vec3(pilot.x_trans_aoc, pilot.y_trans_aoc, pilot.z_trans_aoc));  // all
     H_Matrix6 = glm::rotate(H_Matrix6, glm::radians(pilot.x_rotate), glm::vec3(1.0f, 0.f, 0.f));  // all
     H_Matrix6 = glm::rotate(H_Matrix6, glm::radians(pilot.z_rotate), glm::vec3(0.f, 0.f, 1.0f));  // all
     H_Matrix6 = glm::translate(H_Matrix6, glm::vec3(0.f, 0.7f, -1.7f));
@@ -562,8 +556,7 @@ GLvoid Pilot() // i'am 헬기(조종사) 에요
 
     // 몸통 뒤(꼬리 날개)
     glm::mat4 H_Matrix7 = glm::mat4(1.0f);
-    H_Matrix7 = glm::translate(H_Matrix7, glm::vec3(0.f, 0.f, pilot.z_trans_aoc));  // all
-    H_Matrix7 = glm::translate(H_Matrix7, glm::vec3(pilot.x_trans_aoc, 0.f, 0.f));  // all
+    H_Matrix7 = glm::translate(H_Matrix7, glm::vec3(pilot.x_trans_aoc, pilot.y_trans_aoc, pilot.z_trans_aoc));  // all
     H_Matrix7 = glm::rotate(H_Matrix7, glm::radians(pilot.x_rotate), glm::vec3(1.0f, 0.f, 0.f));  // all
     H_Matrix7 = glm::rotate(H_Matrix7, glm::radians(pilot.z_rotate), glm::vec3(0.f, 0.f, 1.0f));  // all
     H_Matrix7 = glm::translate(H_Matrix7, glm::vec3(0.f, 0.8f, -1.6f));
@@ -581,8 +574,7 @@ GLvoid Pilot() // i'am 헬기(조종사) 에요
 
     //본체 바닥(왼쪽)
     H_Matrix = glm::mat4(1.0f);
-    H_Matrix = glm::translate(H_Matrix, glm::vec3(0.f, 0.f, pilot.z_trans_aoc));
-    H_Matrix = glm::translate(H_Matrix, glm::vec3(pilot.x_trans_aoc, 0.f, 0.f));
+    H_Matrix = glm::translate(H_Matrix, glm::vec3(pilot.x_trans_aoc, pilot.y_trans_aoc, pilot.z_trans_aoc));
     H_Matrix = glm::rotate(H_Matrix, glm::radians(pilot.x_rotate), glm::vec3(1.0f, 0.f, 0.f));  // all
     H_Matrix = glm::rotate(H_Matrix, glm::radians(pilot.z_rotate), glm::vec3(0.f, 0.f, 1.0f));  // all
     H_Matrix = glm::translate(H_Matrix, glm::vec3(0.3f, 0.2f, -0.3f));
@@ -600,8 +592,7 @@ GLvoid Pilot() // i'am 헬기(조종사) 에요
 
     //본체 바닥2
     H_Matrix = glm::mat4(1.0f);
-    H_Matrix = glm::translate(H_Matrix, glm::vec3(0.f, 0.f, pilot.z_trans_aoc));
-    H_Matrix = glm::translate(H_Matrix, glm::vec3(pilot.x_trans_aoc, 0.f, 0.f));
+    H_Matrix = glm::translate(H_Matrix, glm::vec3(pilot.x_trans_aoc, pilot.y_trans_aoc, pilot.z_trans_aoc));
     H_Matrix = glm::rotate(H_Matrix, glm::radians(pilot.x_rotate), glm::vec3(1.0f, 0.f, 0.f));  // all
     H_Matrix = glm::rotate(H_Matrix, glm::radians(pilot.z_rotate), glm::vec3(0.f, 0.f, 1.0f));  // all
     H_Matrix = glm::translate(H_Matrix, glm::vec3(-0.3f, 0.2f, -0.3f));
@@ -616,7 +607,7 @@ GLvoid Pilot() // i'am 헬기(조종사) 에요
     glUniform4f(objColorLocation, 1.0f, 0.3f, 0.7f, 1.0);
     glBindVertexArray(VAO[0]);
     glDrawArrays(GL_TRIANGLES, 0, 36);
-    
+
 
 
 
@@ -632,6 +623,22 @@ GLvoid Pilot_collison()  // i'am 헬기 충돌 체크에요 (vs 건물) 총알 �
 GLvoid Gun() //i'am 총알이에요
 {
 
+    glm::mat4 Bullet = glm::mat4(1.0f);
+    Bullet = glm::translate(Bullet, glm::vec3(pilot.x_trans_aoc, pilot.y_trans_aoc, pilot.z_trans_aoc));
+    Bullet = glm::rotate(Bullet, glm::radians(pilot.x_rotate), glm::vec3(1.0f, 0.f, 0.f));
+    Bullet = glm::rotate(Bullet, glm::radians(pilot.z_rotate), glm::vec3(0.f, 0.f, 1.0f));
+    Bullet = glm::translate(Bullet, glm::vec3(0.f, 0.f, shoot.z_trans));
+    Bullet = glm::translate(Bullet, glm::vec3(0.f, 0.65f, 0.3f));
+    Bullet = glm::scale(Bullet, glm::vec3(0.3f, 0.3f, 0.4f));
+    unsigned int StransformLocation = glGetUniformLocation(s_program, "transform");
+    glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(Bullet));
+    int objColorLocation = glGetUniformLocation(s_program, "objectColor");
+    unsigned isCheck = glGetUniformLocation(s_program, "isCheck");
+    qobj = gluNewQuadric();
+    gluQuadricDrawStyle(qobj, obj_type);
+    glUniform1f(isCheck, false);
+    glUniform4f(objColorLocation, 0.0f, 0.0f, 1.0f, 1.0);
+    gluSphere(qobj, 0.2, 20, 30);
 }
 
 GLvoid Gun_collision() // i'am 총알 충돌체크에요
@@ -640,7 +647,7 @@ GLvoid Gun_collision() // i'am 총알 충돌체크에요
 }
 GLvoid BackGround() //i'am 지형이에요    < -   이번 숙제를 바탕으로 지형이 올라오게 만들고 요리피하고 총알로 부수면서 가는 게임을 함 만들어 볼까? 미로 찾기 마냥... 흠... 이건 일단 보류
 {
-    /*glm::mat4 Bottom = glm::mat4(1.0f);
+    glm::mat4 Bottom = glm::mat4(1.0f);
     Bottom = glm::scale(Bottom, glm::vec3(1000.0f, 0.f, 1000.0f));
     unsigned int StransformLocation = glGetUniformLocation(s_program, "transform");
     glUniformMatrix4fv(StransformLocation, 1, GL_FALSE, glm::value_ptr(Bottom));
@@ -651,9 +658,10 @@ GLvoid BackGround() //i'am 지형이에요    < -   이번 숙제를 바탕으�
     glUniform1f(isCheck, false);
     glUniform4f(objColorLocation, 0.7f, 0.7f, 0.4f, 1.0);
     glBindVertexArray(VAO[1]);
-    glDrawArrays(GL_TRIANGLES, 0, 6);*/
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 }
-//
+
+
 
 void drawScene()
 {
@@ -665,18 +673,14 @@ void drawScene()
         if (i == 0) {
             glViewport(0, 0, width, height);
             if (!h_f.first_see) {  // 이건 3인칭 (기본값) => 헬기랑 같이 움직이게 하려 했는데 안된다... 흠... 다시 시도해보자
-                glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, -0.3f);			//위치
-                glm::vec3 cameraDirection = glm::vec3(0.0f, 0.0f, 0.0f);	//바라보는 방향
-                glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);			//카메라 상향
+                glm::vec3 cameraPos = glm::vec3(pilot.x_trans_aoc, pilot.y_trans_aoc + 1.5f, pilot.z_trans_aoc);			//위치
+                glm::vec3 cameraDirection = glm::vec3(pilot.x_trans_aoc, 0.3f, pilot.z_trans_aoc + 5);	//바라보는 방향
+                glm::vec3 cameraUp = glm::vec3(0.0f, 4.0f, 0.0f);			//카메라 상향
                 glm::mat4 view = glm::mat4(1.0f);
                 view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
-
-                view = glm::rotate(view, glm::radians(-30.f), glm::vec3(1.0f, 0.0f, 0.0f));
-
+                view = glm::translate(view, glm::vec3(pilot.x_trans_aoc, pilot.y_trans_aoc + 1.0f, pilot.z_trans_aoc));
                 view = glm::rotate(view, glm::radians(camera.y_rotate_aoc), glm::vec3(0.0f, 1.0f, 0.0f));
-
-                view = glm::translate(view, glm::vec3(pilot.x_trans_aoc, pilot.y_trans_aoc, pilot.z_trans_aoc));
-
+                view = glm::translate(view, glm::vec3(-pilot.x_trans_aoc, -pilot.y_trans_aoc - 1.0f, -pilot.z_trans_aoc));
 
                 unsigned int viewLocation = glGetUniformLocation(s_program, "view"); //--- 뷰잉 변환 설정
                 glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
@@ -695,7 +699,7 @@ void drawScene()
                 unsigned int viewLocation = glGetUniformLocation(s_program, "view");
                 glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
             }
-           
+
 
             glm::mat4 projection = glm::mat4(1.0f);
             projection = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 50.0f);
@@ -705,7 +709,7 @@ void drawScene()
 
         }
         else {
-            glViewport(1050, 550, 150, 150);
+            glViewport(1000, 600, 200, 200);
             glm::vec3 cameraPos = glm::vec3(pilot.x_trans, 5.0f, pilot.z_trans);         //위치
             glm::vec3 cameraDirection = glm::vec3(pilot.x_trans, 0.0f, pilot.z_trans);   //바라보는 방향
             glm::vec3 cameraUp = glm::vec3(0.0f, 0.0f, 10.0f);         //카메라 상향
@@ -801,6 +805,9 @@ GLvoid KeyBoard(unsigned char key, int x, int y) {
     case '3':
         h_f.first_see = false;
         cout << "3인칭" << endl;
+    case 'p':
+        h_f.shoot_bullet = !h_f.shoot_bullet;
+        break;
     }
     glutPostRedisplay();
 }
@@ -884,6 +891,9 @@ GLvoid Timer(int value)
 
     if (h_f.left_turn)
         pilot.y_rotate_aoc++;
+
+    if (h_f.shoot_bullet)
+        shoot.z_trans += 0.1f;
 
 
 
