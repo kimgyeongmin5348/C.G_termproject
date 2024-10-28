@@ -1,4 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS //--- 프로그램 맨 앞에 선언할 것
+#define Engin "C:/Users/kimkh/Desktop/C.G_test/C.G_project/C.G_project/sound/engins.mp3"
+#define SOUND_FILE_NAME_MIS "C:/Users/kimkh/Desktop/C.G_test/C.G_project/C.G_project/sound/missile.wav"
+#include <stdlib.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
@@ -11,8 +14,18 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <random>
 #include <string>
+#include <glm/fwd.hpp>
 #include <chrono>
+#pragma comment(lib,"winmm.lib")
+#include <mmsystem.h>
+#include <Digitalv.h>
 
+MCI_OPEN_PARMS openBgm;     // MCI_OPEN_PARMS는 MCI_OPEN 커맨드를 위한 정보가 담긴 구조체
+MCI_PLAY_PARMS playBgm;
+MCI_OPEN_PARMS openShuffleSound;
+MCI_PLAY_PARMS playShuffleSound;
+
+int dwID;
 
 #define width 1200
 #define height 800
@@ -274,14 +287,14 @@ GLvoid CollisionCheck(int i, int j)
         memcpy(&pilot, &temp, sizeof(pilot));
         memcpy(&camera, &temp, sizeof(camera));
         memcpy(&h_f, &temp_f, sizeof(h_f));
-        cout << "충돌" << i << " : " << pilot.x_trans_aoc << ", " << pilot.y_trans_aoc << ", " << build[i][j].y_scale / 5 << '\n';
+        // cout << "충돌" << i << " : " << pilot.x_trans_aoc << ", " << pilot.y_trans_aoc << ", " << build[i][j].y_scale / 5 << '\n';
         auto end_time = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
         double elapsed_seconds = duration.count() * 1e-6;
-        std::cout << "Score: " << elapsed_seconds * 100 << " 점 입니다." << std::endl;
+        std::cout << "생존 시간: " << elapsed_seconds << " 초!" << std::endl;
         start_time = std::chrono::high_resolution_clock::now();
     }
-
+    // cout << "충돌" << i << " : " << pilot.x_trans_aoc << ", " << pilot.y_trans_aoc << ", " << build[i][j].y_scale / 5 << '\n';
 
 
 }
@@ -290,6 +303,7 @@ GLvoid CollisionCheck(int i, int j)
 GLvoid GunCollision(int i, int j) // i'am 총알 충돌체크에요
 {
     if ((build[i][j].x_trans - 0.6f) < bullet.x_trans_aoc && bullet.x_trans_aoc < (build[i][j].x_trans + 0.6f) && bullet.y_trans_aoc < build[i][j].y_scale / 5 - 0.2f && bullet.z_trans_aoc < (build[i][j].z_trans + 1) && bullet.z_trans_aoc >(build[i][j].z_trans - 1)) {
+        // cout << "총알 충돌" << i << " : " << bullet.x_trans_aoc << ", " << bullet.y_trans_aoc << ", " << build[i][j].y_scale / 5 << "," << bullet.z_trans_aoc << ":::" << build[i][j].z_trans_aoc << '\n';
         build[i][j].y_scale = 0;
     }
 }
@@ -312,7 +326,7 @@ GLvoid Building_Mat()  // i'am 빌딩 만들기이에요
             int objColorLocation = glGetUniformLocation(s_program, "objectColor");
             unsigned isCheck = glGetUniformLocation(s_program, "isCheck");
             glUniform1f(isCheck, false);
-            glm::vec4 cubeColor = glm::vec4(0.0f, 0.0f, 0.5f, 1.0f); // 색상을 원하는 값으로 설정
+            glm::vec4 cubeColor = glm::vec4(1.0f, 0.0f, 0.5f, 1.0f); // 색상을 원하는 값으로 설정
             glUniform3f(objColorLocation, cubeColor.r, cubeColor.g, cubeColor.b);
             glBindVertexArray(VAO[0]);
             glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -353,6 +367,8 @@ GLfloat arm_rot;
 GLfloat limit;
 GLvoid Pilot() // i'am 헬기(조종사) 에요
 {
+    
+
     // 날개 연결부
     glm::mat4 H_Matrix = glm::mat4(1.0f);
     H_Matrix = glm::translate(H_Matrix, glm::vec3(0.f, pilot.y_trans_aoc, pilot.z_trans_aoc));  // all
@@ -546,11 +562,6 @@ GLvoid Pilot() // i'am 헬기(조종사) 에요
     glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
-GLvoid Pilot_collison()  // i'am 헬기 충돌 체크에요 (vs 건물) 총알 발사 하면 이김 -> 총알 충돌체크도 해야할듯?
-{
-
-}
-
 bool bullet_flag = false;
 GLvoid Bullet() //i'am 총알이에요
 {
@@ -576,7 +587,7 @@ GLvoid Bullet() //i'am 총알이에요
         qobj = gluNewQuadric();
         gluQuadricDrawStyle(qobj, obj_type);
         glUniform1f(isCheck, false);
-        glUniform3f(objColorLocation, 0.0f, 0.0f, 1.0f);
+        glUniform3f(objColorLocation, 1.0f, 1.0f, 1.0f);
         gluSphere(qobj, 0.2, 20, 30);
     }
 }
@@ -598,11 +609,17 @@ GLvoid Ground() // i'am Ground
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
+//void playingBgm(void) {
+//    openBgm.lpstrElementName = Engin;
+//}
+
 void drawScene()
 {
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 깊이 검사 (클리핑)
     glUseProgram(s_program);
+
+    
 
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 projection = glm::mat4(1.0f);
@@ -652,15 +669,22 @@ void drawScene()
         unsigned int projectionLocation = glGetUniformLocation(s_program, "projection");
         glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
 
+        float lightInitialX = 0;
+        float lightInitialY = 10;
+        float lightInitialZ = 20.f;
+        float lightRotationAngle = glm::radians(0.0f);
+        glm::vec4 lightPosition(lightInitialX, lightInitialY, lightInitialZ, 1.0f);
+        lightPosition = glm::rotate(glm::mat4(1.0f), lightRotationAngle, glm::vec3(1.0f, 0.0f, 0.0f)) * lightPosition;
         glUseProgram(s_program);
         unsigned int lightPosLocation = glGetUniformLocation(s_program, "lightPos"); //--- lightPos 값 전달: (0.0, 0.0, 5.0);
-        glUniform3f(lightPosLocation, pilot.x_trans_aoc*10, pilot.y_trans_aoc*10, 0.5f);
+        glUniform3f(lightPosLocation, lightPosition.x, lightPosition.y, lightPosition.z);
+        // glUniform3f(lightPosLocation, 4, 10, 10.f);
+        // glUniform3f(lightPosLocation, pilot.x_trans_aoc * 10, pilot.y_trans_aoc * 10, 0.5f);
         unsigned int lightColorLocation = glGetUniformLocation(s_program, "lightColor"); //--- lightColor 값 전달: (1.0, 1.0, 1.0) 백색
-        glUniform3f(lightColorLocation, 1.0f, 1.0f, 1.0f);
+        glUniform3f(lightColorLocation, 0.7f, 0.7f, 0.7f);
         // cout << pilot.x_trans_aoc << '\n';
 
         Pilot();
-        Pilot_collison();
         Bullet();
         Ground();
         Building_Mat();
@@ -734,6 +758,7 @@ GLvoid KeyBoard(unsigned char key, int x, int y)
     case ' ':
         h_f.shoot_bullet = true;
         bullet_flag = true;
+        PlaySound(TEXT(SOUND_FILE_NAME_MIS), NULL, SND_ASYNC);
         break;
     }
     glutPostRedisplay();
@@ -752,20 +777,6 @@ GLvoid SpecialKeyBoardUp(int key, int x, int y)
     glutPostRedisplay();
 }
 
-void Mouse(int button, int state, int x, int y)
-{
-
-}
-
-void Motion(int x, int y)
-{
-
-}
-
-void MouseChange(int x, int y)
-{
-
-}
 
 void main(int argc, char** argv) {
     glutInit(&argc, argv);
@@ -774,6 +785,8 @@ void main(int argc, char** argv) {
     glutInitWindowSize(width, height);
     glutCreateWindow("SkyLine");
     Setting();
+
+    //PlaySound(TEXT(SOUND_FILE_NAME_PLAY), NULL, SND_ASYNC | SND_LOOP);
 
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK)
@@ -790,8 +803,6 @@ void main(int argc, char** argv) {
     glutSpecialFunc(SpecialKeyBoard);
     glutSpecialUpFunc(SpecialKeyBoardUp);
     glutKeyboardUpFunc(KeyBoardUp);
-    glutMouseFunc(Mouse);
-    glutMotionFunc(Motion);
     glutReshapeFunc(Reshape);
 
     glutTimerFunc(5, Timer, 1);
@@ -864,7 +875,7 @@ GLvoid Timer(int value) // get_events
 
 
     if (h_f.game_start) {
-        std::uniform_real_distribution<float> random_building_come(0.000001, 0.2);
+        std::uniform_real_distribution<float> random_building_come(0.000001, 0.4);
         // 건물 다가오기
         for (int i = 0; i < BUILDING_COUNT; ++i) {
             for (int j = 0; j < BUILDING_COUNT_J; ++j) {
@@ -882,6 +893,7 @@ GLvoid Timer(int value) // get_events
                  //}
             }
         }
+    
     }
 
 
